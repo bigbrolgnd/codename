@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.DS_Store
+coverage
+.turbo
+.bmad
+.bmad-output
+.gemini
+.claude
+_bmad
+_bmad-output
