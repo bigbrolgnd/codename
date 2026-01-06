@@ -23,12 +23,12 @@ const EditSchema = z.object({
   category: z.string().nullable(),
 });
 
-export const ServiceCardExpanded = ({ 
-  service, 
-  onSave, 
-  onCancel, 
+export const ServiceCardExpanded = ({
+  service,
+  onSave,
+  onCancel,
   onDelete,
-  className 
+  className
 }: ServiceCardExpandedProps) => {
   // State for form fields
   const [name, setName] = useState(service.name);
@@ -50,8 +50,8 @@ export const ServiceCardExpanded = ({
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       // Handle Zod error structure (issues vs errors)
-      const issues = result.error.issues || result.error.errors || [];
-      
+      const issues = result.error.issues || [];
+
       if (Array.isArray(issues)) {
         issues.forEach((err: any) => {
           if (err.path && err.path[0]) {
@@ -59,7 +59,7 @@ export const ServiceCardExpanded = ({
           }
         });
       }
-      
+
       setErrors(fieldErrors);
       return;
     }
@@ -93,9 +93,9 @@ export const ServiceCardExpanded = ({
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Editing Service
           </CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => onDelete(service.id)}
             className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive p-0"
             title="Delete Service"
@@ -103,7 +103,7 @@ export const ServiceCardExpanded = ({
             <Trash2 className="h-4 w-4" />
           </Button>
         </CardHeader>
-        
+
         <CardContent className="p-4 space-y-4">
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground">Service Name</label>

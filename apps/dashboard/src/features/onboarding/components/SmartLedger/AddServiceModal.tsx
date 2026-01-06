@@ -37,8 +37,8 @@ export const AddServiceModal = ({ isOpen, onClose, onAdd }: AddServiceModalProps
 
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
-      const issues = result.error.issues || result.error.errors || [];
-      
+      const issues = result.error.issues || [];
+
       if (Array.isArray(issues)) {
         issues.forEach((err: any) => {
           if (err.path && err.path[0]) {
@@ -58,7 +58,7 @@ export const AddServiceModal = ({ isOpen, onClose, onAdd }: AddServiceModalProps
       confidence: 100, // Manual add = 100% confidence
       description: '',
     });
-    
+
     // Reset and close
     setName('');
     setPriceDollars('');
@@ -105,7 +105,7 @@ export const AddServiceModal = ({ isOpen, onClose, onAdd }: AddServiceModalProps
               />
               {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
             </div>
-            
+
             <div className="space-y-2">
               <label htmlFor="duration" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Duration

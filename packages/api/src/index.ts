@@ -2,3 +2,8 @@ export * from './extraction.types';
 export * from './provision.types';
 export * from './schemas/extraction.schema';
 export * from './schemas/provision.schema';
+export * from './schemas/site.schema';
+export * from './schemas/admin.schema';
+export * from './schemas/marketing.schema';
+export * from './schemas/theme.schema';
+export * from './utils/color-utils';

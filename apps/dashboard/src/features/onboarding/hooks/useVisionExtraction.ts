@@ -61,7 +61,7 @@ export function useVisionExtraction({
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // tRPC mutations and queries
-  const startMutation = trpc.extraction.start.useMutation();
+  const ingestMutation = trpc.site.ingestIntakeData.useMutation();
   const statusQuery = trpc.extraction.status.useQuery(
     { jobId: jobId ?? '' },
     {
@@ -138,14 +138,29 @@ export function useVisionExtraction({
     }
 
     try {
-      // Upload the image first
+      // Handle based on file type
+      const isImage = file.type.startsWith('image/');
+      
+      // Upload the image first if it's an image
       setStatus({ phase: 'uploading', progress: 50 });
-      const imageUrl = await uploadImage(file);
+      let content = '';
+      
+      if (isImage) {
+        content = await uploadImage(file);
+      } else {
+        // For text files (from text input mode), read content
+        content = await file.text();
+      }
+      
       setStatus({ phase: 'uploading', progress: 100 });
 
-      // Start the extraction job
-      const result = await startMutation.mutateAsync({ imageUrl });
-      setJobId(result.jobId);
+      // Start the intake ingestion job
+      const result = await ingestMutation.mutateAsync({ 
+        method: isImage ? 'upload' : 'text',
+        content: content
+      });
+      
+      setJobId(result.extractionJobId);
 
       // Status polling will be handled by the useQuery hook above
       setStatus({ phase: 'enhancing', progress: 0 });
@@ -160,7 +175,7 @@ export function useVisionExtraction({
       setIsProcessing(false);
       onError?.(error);
     }
-  }, [useMock, onComplete, onError, startMutation]);
+  }, [useMock, onComplete, onError, ingestMutation]);
 
   const reset = useCallback(() => {
     if (abortControllerRef.current) {

@@ -13,17 +13,20 @@ vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-// Mock the useVisionExtraction hook to avoid tRPC context requirement in tests
+// Mock the useVisionExtraction hook
 const mockExtract = vi.fn();
 const mockReset = vi.fn();
 
+// Create a mock implementation that can be changed
+const mockUseVisionExtraction = vi.fn(() => ({
+  extract: mockExtract,
+  status: null,
+  isProcessing: false,
+  reset: mockReset,
+}));
+
 vi.mock('../hooks/useVisionExtraction', () => ({
-  useVisionExtraction: () => ({
-    extract: mockExtract,
-    status: null,
-    isProcessing: false,
-    reset: mockReset,
-  }),
+  useVisionExtraction: () => mockUseVisionExtraction(),
 }));
 
 describe('ServiceUpload', () => {
@@ -32,6 +35,13 @@ describe('ServiceUpload', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default mock implementation
+    mockUseVisionExtraction.mockReturnValue({
+      extract: mockExtract,
+      status: null,
+      isProcessing: false,
+      reset: mockReset,
+    });
     // Make extract trigger processing state simulation
     mockExtract.mockImplementation(() => Promise.resolve());
   });
@@ -193,6 +203,53 @@ describe('ServiceUpload', () => {
       await waitFor(() => {
         expect(screen.getByText("Let's see your menu.")).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('shows error message when extraction fails', () => {
+      mockUseVisionExtraction.mockReturnValue({
+        extract: mockExtract,
+        status: { 
+          phase: 'error', 
+          error: { code: 'SERVER_ERROR', message: 'Network connection failed', canRetry: true } 
+        },
+        isProcessing: false,
+        reset: mockReset,
+      } as any);
+
+      render(
+        <ServiceUpload
+          onUploadComplete={mockOnUploadComplete}
+          onManualEntry={mockOnManualEntry}
+        />
+      );
+
+      expect(screen.getByText(/Network connection failed/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Retry/i })).toBeInTheDocument();
+    });
+
+    it('calls reset when Try Another Photo is clicked', async () => {
+       const user = userEvent.setup();
+       mockUseVisionExtraction.mockReturnValue({
+        extract: mockExtract,
+        status: { 
+          phase: 'error', 
+          error: { code: 'UNREADABLE_IMAGE', message: 'Image too blurry', canRetry: true } 
+        },
+        isProcessing: false,
+        reset: mockReset,
+      } as any);
+
+      render(
+        <ServiceUpload
+          onUploadComplete={mockOnUploadComplete}
+          onManualEntry={mockOnManualEntry}
+        />
+      );
+
+      await user.click(screen.getByRole('button', { name: /Try Another Photo/i }));
+      expect(mockReset).toHaveBeenCalled();
     });
   });
 

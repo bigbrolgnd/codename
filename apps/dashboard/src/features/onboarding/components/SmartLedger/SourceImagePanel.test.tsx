@@ -24,6 +24,7 @@ vi.mock('lucide-react', () => ({
   RotateCcw: () => <svg data-testid="icon-rotate-ccw" />,
   Minimize2: () => <svg data-testid="icon-minimize" />,
   Maximize2: () => <svg data-testid="icon-maximize" />,
+  Loader2: () => <svg data-testid="icon-loader" />,
 }));
 
 describe('SourceImagePanel', () => {
@@ -49,12 +50,15 @@ describe('SourceImagePanel', () => {
   it('renders image correctly', () => {
     render(<SourceImagePanel imageUrl={mockUrl} />);
     const img = screen.getByAltText('Source Receipt');
+    fireEvent.load(img); // Trigger onLoad
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute('src', mockUrl);
   });
 
   it('renders zoom controls', () => {
     render(<SourceImagePanel imageUrl={mockUrl} />);
+    const img = screen.getByAltText('Source Receipt');
+    fireEvent.load(img); // Trigger onLoad
     expect(screen.getByTitle('Zoom In')).toBeInTheDocument();
     expect(screen.getByTitle('Zoom Out')).toBeInTheDocument();
     expect(screen.getByTitle('Reset Zoom')).toBeInTheDocument();
@@ -63,6 +67,8 @@ describe('SourceImagePanel', () => {
   it('renders collapse button when isMobile is true', () => {
     const onCollapse = vi.fn();
     render(<SourceImagePanel imageUrl={mockUrl} isMobile={true} onCollapse={onCollapse} />);
+    const img = screen.getByAltText('Source Receipt');
+    fireEvent.load(img); // Trigger onLoad
     const collapseBtn = screen.getByTitle('Collapse');
     expect(collapseBtn).toBeInTheDocument();
     fireEvent.click(collapseBtn);
@@ -91,6 +97,10 @@ describe('SourceImagePanel', () => {
   it('renders bounding boxes for services', () => {
     const { container } = render(<SourceImagePanel imageUrl={mockUrl} services={mockServices} />);
     
+    // Trigger image load to reveal bounding boxes
+    const img = screen.getByAltText('Source Receipt');
+    fireEvent.load(img);
+
     // Check if the bounding box div exists by style
     // We can't easily query by style, but we can check if a div with the correct style attributes exists
     // Or we can rely on the fact that we mocked TransformComponent to render children

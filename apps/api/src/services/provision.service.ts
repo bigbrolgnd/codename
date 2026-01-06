@@ -5,114 +5,105 @@ import {
   ProvisioningLog 
 } from '@codename/api';
 import { provisioningJobs } from '../routers/provision.router';
-import { DatabaseManager } from '@codename/database';
+import { TenantDatabaseService } from './tenant/tenant-database.service';
+import { ContainerService } from './tenant/container.service';
 
-const dbManager = new DatabaseManager();
+const tenantDbService = new TenantDatabaseService();
+const containerService = new ContainerService();
 
-const MOCK_LOGS: Record<ProvisioningPhase, string[]> = {
-  architecture: [
-    "Setting up your business profile...",
-    "Claiming your web address...",
-    "Preparing your private workspace..."
-  ],
-  intelligence: [
-    "Creating your secure database...",
-    "Organizing your services...",
-    "Building your 30-day calendar...",
-    "Optimizing brand imagery..."
-  ],
-  security: [
-    "Connecting your payment system...",
-    "Securing your checkout with SSL...",
-    "Protecting your customer data..."
-  ],
-  launch: [
-    "Publishing your site...",
-    "Warming up for your first visitor...",
-    "Going live in 3... 2... 1..."
-  ]
-};
+const MOCK_ARCH_LOGS: string[] = [
+  "Setting up your business profile...",
+  "Claiming your web address...",
+  "Preparing your private workspace..."
+];
 
 export class ProvisioningService {
   /**
-   * Starts the provisioning process (triggers n8n)
+   * Starts the provisioning process (triggers n8n or runs internal orchestration)
    */
   async startProvisioning(provisioningId: string, request: ProvisioningRequest) {
-    // In a real app, this would be an axios/fetch call to n8n webhook
-    console.log(`[ProvisioningService] Starting job ${provisioningId}`);
-    
-    // Simulate the n8n orchestration process
-    this.runMockOrchestration(provisioningId, request);
+    console.log(`[ProvisioningService] Starting modular job ${provisioningId}`);
+    this.runOrchestration(provisioningId, request);
   }
 
   /**
-   * Mock n8n orchestration process
+   * Orchestration process using modular services
    */
-  private async runMockOrchestration(provisioningId: string, request: ProvisioningRequest) {
-    const phases: ProvisioningPhase[] = ['architecture', 'intelligence', 'security', 'launch'];
-    let overallProgress = 0;
+  private async runOrchestration(provisioningId: string, request: ProvisioningRequest) {
     const businessName = request.businessName || `tenant_${provisioningId.substring(0, 4)}`;
-    const schemaName = `tenant_${provisioningId.replace(/-/g, '_')}`;
+    let schemaName = '';
 
-    // Initialize master table if not exists (in a real app, this is a migration)
-    await dbManager.initMasterTable();
-
-    for (const phase of phases) {
-      // --- Phase-specific DB logic ---
-      if (phase === 'architecture') {
-        try {
-          await dbManager.createTenantRecord(businessName, schemaName);
-          this.addLog(provisioningId, 'Tenant record created in master table', 'success', phase);
-        } catch (e: any) {
-          this.addLog(provisioningId, `Failed to create tenant record: ${e.message}`, 'warning', phase);
-        }
-      }
-      if (phase === 'intelligence') {
-        try {
-          await dbManager.createTenantSchema(schemaName);
-          this.addLog(provisioningId, `Database schema '${schemaName}' secured`, 'success', phase);
-          // Here you would seed the data, e.g.,
-          // await dbManager.queryInSchema(schemaName, 'CREATE TABLE services (...)');
-          this.addLog(provisioningId, `Seeded ${request.services.length} services`, 'info', phase);
-        } catch (e: any) {
-          this.addLog(provisioningId, `Failed to create schema: ${e.message}`, 'warning', phase);
-        }
-      }
-      // --- End of DB logic ---
-
-      const phaseLogs = MOCK_LOGS[phase];
-      const stepIncrement = 25 / phaseLogs.length;
-
-      for (let i = 0; i < phaseLogs.length; i++) {
-        const message = phaseLogs[i];
-        
-        await new Promise(r => setTimeout(r, 250 + Math.random() * 250)); // Faster simulation
-        
-        this.addLog(provisioningId, message, 'info', phase, stepIncrement);
-      }
+    // --- PHASE 1: Architecture (Tenant Record) ---
+    for (const log of MOCK_ARCH_LOGS) {
+       await this.simulateDelay();
+       this.addLog(provisioningId, log, 'info', 'architecture', 5);
     }
 
-    // Finalize
-    const finalStatus = provisioningJobs.get(provisioningId);
-    if (finalStatus) {
-      provisioningJobs.set(provisioningId, {
-        ...finalStatus,
-        status: 'complete',
-        overallProgress: 100,
-        phaseProgress: 100,
-        result: {
-          siteUrl: `https://${businessName.toLowerCase().replace(/\s+/g, '-')}.codename.app`,
-          dashboardUrl: `https://dashboard.codename.app/sites/${provisioningId}`,
-          tenantId: schemaName,
-        }
-      });
+    // --- PHASE 2: Intelligence (DB Schema & Seeding) ---
+    try {
+      // Step A: Create Schema
+      const schemaResult = await tenantDbService.createTenantSchema(provisioningId, businessName);
+      schemaName = schemaResult.schemaName;
+      this.batchAddLogs(provisioningId, schemaResult.logs, 'architecture');
+
+      // Step B: Seed Data
+      await this.simulateDelay();
+      const seedLogs = await tenantDbService.seedTenantData(schemaName, request.services);
+      this.batchAddLogs(provisioningId, seedLogs, 'intelligence');
+      
+    } catch (e: any) {
+      this.addLog(provisioningId, `Critical Error: ${e.message}`, 'error', 'intelligence');
+      return; // Stop provisioning on error
+    }
+
+    // --- PHASE 3: Security (Mock) ---
+    // In future, this would call a SecurityService (SSL, Passkeys)
+    this.addLog(provisioningId, "Connecting secure payment gateway...", 'info', 'security', 10);
+    await this.simulateDelay();
+    this.addLog(provisioningId, "Encrypting customer data vault...", 'success', 'security', 10);
+
+    // --- PHASE 4: Launch (Container Provisioning) ---
+    try {
+      const containerResult = await containerService.provisionContainer(provisioningId, schemaName);
+      this.batchAddLogs(provisioningId, containerResult.logs, 'launch');
+
+      // Final Success State
+      const currentStatus = provisioningJobs.get(provisioningId);
+      if (currentStatus) {
+        provisioningJobs.set(provisioningId, {
+          ...currentStatus,
+          status: 'complete',
+          overallProgress: 100,
+          phaseProgress: 100,
+          currentPhase: 'launch',
+          result: {
+            siteUrl: containerResult.containerUrl,
+            dashboardUrl: `https://dashboard.codename.app/sites/${provisioningId}`,
+            tenantId: schemaName,
+          }
+        });
+      }
+
+    } catch (e: any) {
+      this.addLog(provisioningId, `Container Error: ${e.message}`, 'error', 'launch');
     }
   }
 
-  /**
-   * Adds a log entry and updates the job status
-   */
-  private addLog(provisioningId: string, message: string, type: 'info' | 'success' | 'warning', phase: ProvisioningPhase, progressIncrement: number = 0) {
+  // --- Helper Methods ---
+
+  private async simulateDelay() {
+    await new Promise(r => setTimeout(r, 400 + Math.random() * 300));
+  }
+
+  private batchAddLogs(provisioningId: string, logs: ProvisioningLog[], phase: ProvisioningPhase) {
+    logs.forEach(log => {
+       // We force the log phase to match the current step context if needed, 
+       // but mostly trust the service return
+       this.addLog(provisioningId, log.message, log.type, (log as any).phase || phase, 5);
+    });
+  }
+
+  private addLog(provisioningId: string, message: string, type: 'info' | 'success' | 'warning' | 'error', phase: ProvisioningPhase, progressIncrement: number = 0) {
       const currentStatus = provisioningJobs.get(provisioningId);
       if (!currentStatus) return;
 
@@ -141,14 +132,9 @@ export class ProvisioningService {
       provisioningJobs.set(provisioningId, updatedStatus);
   }
 
-
-  /**
-   * Updates status from an external source (e.g. n8n webhook)
-   */
   async updateStatus(provisioningId: string, update: Partial<ProvisioningStatusResponse>) {
     const current = provisioningJobs.get(provisioningId);
     if (!current) throw new Error('Job not found');
-    
     provisioningJobs.set(provisioningId, { ...current, ...update });
   }
 }

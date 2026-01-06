@@ -1,4 +1,6 @@
 import { Pool, PoolConfig } from 'pg';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class DatabaseManager {
   private pool: Pool;
@@ -51,8 +53,8 @@ export class DatabaseManager {
     const client = await this.pool.connect();
     try {
       // Validate schema name to prevent SQL injection
-      if (!/^[a-z0-9_]+$/.test(schema)) {
-        throw new Error('Invalid schema name');
+      if (!/^tenant_[a-z0-9_]+$/.test(schema)) {
+        throw new Error('Invalid schema name format');
       }
 
       await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
@@ -63,13 +65,24 @@ export class DatabaseManager {
   }
 
   /**
+   * Runs migrations for a tenant schema
+   */
+  async runMigrations(schema: string, migrationFile: string = '001_booking_init.sql') {
+    const migrationPath = path.join(__dirname, 'migrations', migrationFile);
+    const sql = fs.readFileSync(migrationPath, 'utf8');
+    
+    await this.queryInSchema(schema, sql);
+    console.log(`[DatabaseManager] Ran migration ${migrationFile} for schema: ${schema}`);
+  }
+
+  /**
    * Executes a query within a specific schema
    */
   async queryInSchema(schema: string, query: string, params: any[] = []) {
     const client = await this.pool.connect();
     try {
-      if (!/^[a-z0-9_]+$/.test(schema)) {
-        throw new Error('Invalid schema name');
+      if (!/^tenant_[a-z0-9_]+$/.test(schema)) {
+        throw new Error('Invalid schema name format');
       }
 
       await client.query(`SET search_path TO ${schema}`);
@@ -86,5 +99,12 @@ export class DatabaseManager {
    */
   async close() {
     await this.pool.end();
+  }
+
+  /**
+   * Executes a raw query on the pool
+   */
+  async query(text: string, params: any[] = []) {
+    return this.pool.query(text, params);
   }
 }

@@ -1,16 +1,15 @@
-import { initTRPC } from '@trpc/server';
+import { router, publicProcedure } from '../trpc';
 import { z } from 'zod';
-import { ProvisioningRequestSchema, ProvisioningStatusSchema } from '@codename/api';
+import { ProvisioningRequestSchema } from '@codename/api';
 import { ProvisioningService } from '../services/provision.service';
 
-const t = initTRPC.create();
 const provisioningService = new ProvisioningService();
 
 // Mock in-memory storage for status
 export const provisioningJobs = new Map<string, any>();
 
-export const provisionRouter = t.router({
-  start: t.procedure
+export const provisionRouter = router({
+  start: publicProcedure
     .input(ProvisioningRequestSchema)
     .mutation(async ({ input }) => {
       const provisioningId = crypto.randomUUID();
@@ -32,7 +31,7 @@ export const provisionRouter = t.router({
       return { provisioningId };
     }),
 
-  getStatus: t.procedure
+  getStatus: publicProcedure
     .input(z.object({ provisioningId: z.string().uuid() }))
     .query(({ input }) => {
       const status = provisioningJobs.get(input.provisioningId);
@@ -46,7 +45,7 @@ export const provisionRouter = t.router({
    * Internal webhook for n8n to update status
    * In production, this would be protected by a shared secret header
    */
-  updateStatus: t.procedure
+  updateStatus: publicProcedure
     .input(z.object({
       provisioningId: z.string().uuid(),
       update: z.any() // Simplified for now

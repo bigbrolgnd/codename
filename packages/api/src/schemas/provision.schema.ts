@@ -21,7 +21,8 @@ export const ProvisioningLogSchema = z.object({
   id: z.string(),
   timestamp: z.string(),
   message: z.string(),
-  type: z.enum(['info', 'success', 'warning']),
+  type: z.enum(['info', 'success', 'warning', 'error']),
+  phase: z.enum(['architecture', 'intelligence', 'security', 'launch']).optional(),
 });
 
 /**

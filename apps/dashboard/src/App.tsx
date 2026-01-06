@@ -4,7 +4,7 @@ import { SmartLedger } from './features/onboarding/components/SmartLedger'
 import { TheatricalReveal } from './features/onboarding/components/TheatricalReveal'
 import { ExtractionResult } from '@codename/api'
 import { EditableService } from './features/onboarding/types/smartLedger.types'
-import { Button } from './components/ui/button'
+import { DashboardLayout } from './features/admin/components/DashboardLayout'
 
 function App() {
   const [step, setStep] = useState<'welcome' | 'upload' | 'review' | 'reveal' | 'dashboard'>('welcome')
@@ -96,17 +96,9 @@ function App() {
     )
   }
 
-  // Dashboard Step (Placeholder for Epic 3)
+  // Dashboard Step
   if (step === 'dashboard') {
-    return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-emerald-500 mb-4">Command Center</h2>
-          <p className="text-zinc-400 text-xl">Welcome to your business dashboard.</p>
-          <Button variant="link" className="mt-8 text-zinc-500" onClick={() => setStep('welcome')}>Start Over (Dev Only)</Button>
-        </div>
-      </div>
-    )
+    return <DashboardLayout />
   }
 
   return null

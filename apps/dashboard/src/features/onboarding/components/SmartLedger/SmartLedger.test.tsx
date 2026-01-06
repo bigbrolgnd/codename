@@ -197,7 +197,7 @@ describe('SmartLedger Integration', () => {
     expect(calledServices).toHaveLength(2);
   });
   
-  it('collapses image panel', () => {
+  it('collapses image panel', async () => {
     render(
       <SmartLedger 
         extractionResult={mockExtractionResult} 
@@ -205,16 +205,13 @@ describe('SmartLedger Integration', () => {
       />
     );
     
-    // Find collapse button (mocked icon Minimize2)
-    // Actually SourceImagePanel renders buttons.
-    // The button has title="Collapse" (if isMobile=true, which we set to true)
+    // Trigger image load to show controls
+    const img = screen.getByAltText('Source Receipt');
+    fireEvent.load(img);
     
+    // Find collapse button
     const collapseBtn = screen.getByTitle('Collapse');
     fireEvent.click(collapseBtn);
-    
-    // Expect collapsed state: image not visible or container class changed.
-    // In test environment, checking class names on specific elements might be tricky without testIds.
-    // But we know SourceImagePanel renders "Show Source Image" button when collapsed.
     
     expect(screen.getByText('Show Source Image')).toBeInTheDocument();
   });

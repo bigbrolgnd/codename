@@ -1,7 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import App from './App';
-import { vi, describe, it, expect } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import App from './App'
+import { trpc } from '@/lib/trpc'
+
+// Mock tRPC
 
 // Mock canvas-confetti
 vi.mock('canvas-confetti', () => ({
@@ -42,7 +45,52 @@ vi.mock('./features/onboarding/components/TheatricalReveal', () => ({
   )
 }));
 
+// Mock tRPC
+vi.mock('@/lib/trpc', () => ({
+  trpc: {
+    extraction: {
+      start: { useMutation: vi.fn() },
+      status: { useQuery: vi.fn() },
+      result: { useQuery: vi.fn() },
+    },
+    site: {
+      ingestIntakeData: { useMutation: vi.fn() },
+    },
+    admin: {
+      getActionFeed: { useQuery: vi.fn() },
+      sendAgentMessage: { useMutation: vi.fn() },
+      getUsageStatus: { useQuery: vi.fn() },
+      getSubscriptionStatus: { useQuery: vi.fn() },
+    },
+  },
+}));
+
 describe('App Flow', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    
+    // Default mocks
+    (trpc.admin.getActionFeed.useQuery as any).mockReturnValue({
+      data: { items: [], totalCount: 0 },
+      isLoading: false,
+    });
+
+    (trpc.admin.sendAgentMessage.useMutation as any).mockReturnValue({
+      mutateAsync: vi.fn(),
+      isLoading: false,
+    });
+
+    (trpc.admin.getUsageStatus.useQuery as any).mockReturnValue({
+      data: { aiPercentage: 0, visitsTotal: 0, isCapped: false },
+      isLoading: false,
+    });
+
+    (trpc.admin.getSubscriptionStatus.useQuery as any).mockReturnValue({
+      data: { canAccessDesignStudio: true },
+      isLoading: false,
+    });
+  });
+
   it('transitions from welcome to upload to review to reveal to dashboard', async () => {
     render(<App />);
     
@@ -68,9 +116,10 @@ describe('App Flow', () => {
     // Expect Reveal Step
     expect(screen.getByText('Theatrical Reveal')).toBeInTheDocument();
     
-    // Reveal -> Dashboard
+    // Navigate to Dashboard
     fireEvent.click(screen.getByText('Go to Dashboard'));
     
-    expect(screen.getByText('Command Center')).toBeInTheDocument();
+    expect(screen.getAllByText('COMMAND').length).toBeGreaterThan(0);
   });
 });
+

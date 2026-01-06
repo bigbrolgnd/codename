@@ -9,6 +9,9 @@ export default defineConfig({
     react(),
     sri(),
   ],
+  build: {
+    emptyOutDir: false,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

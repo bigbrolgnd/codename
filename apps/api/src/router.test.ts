@@ -1,6 +1,40 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { appRouter } from './router';
 
+// Mock VisionService to avoid real API calls in integration tests
+vi.mock('./services/vision.service', () => {
+  class MockVisionService {
+    async processImage(imageUrl: string) {
+      // Simulate processing delay for fake timers
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      return {
+        id: crypto.randomUUID(),
+        services: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Test Service',
+            price: 5000,
+            duration: 60,
+            category: 'Hair',
+            description: 'Test description',
+            confidence: 95,
+          },
+        ],
+        categories: ['Hair'],
+        overallConfidence: 95,
+        sourceImageUrl: imageUrl,
+        processingTimeMs: 3000,
+        warnings: [],
+      };
+    }
+  }
+
+  return {
+    VisionService: MockVisionService,
+  };
+});
+
 // Create a caller for testing the router directly (tRPC v10 style)
 const caller = appRouter.createCaller({});
 
