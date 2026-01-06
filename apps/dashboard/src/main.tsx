@@ -4,10 +4,14 @@ import App from './App.tsx'
 import { TRPCProvider } from './lib/TRPCProvider.tsx'
 import './index.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <TRPCProvider>
-      <App />
-    </TRPCProvider>
-  </React.StrictMode>,
-)
+try {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <TRPCProvider>
+        <App />
+      </TRPCProvider>
+    </React.StrictMode>
+  );
+} catch (e) {
+  console.error('React Render Error:', e);
+}
