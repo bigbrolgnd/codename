@@ -1,12 +1,10 @@
 import { z } from 'zod';
 
-export const PLAN_TIERS = {
-  BASIC: 'basic',
-  GROWTH: 'growth',
-  PRO: 'pro',
-} as const;
-
-export type PlanTier = typeof PLAN_TIERS[keyof typeof PLAN_TIERS];
+/**
+ * Theme schema
+ * Note: PLAN_TIERS constant removed - replaced by new pricing model in pricing.schema.ts
+ * See BasePlanType in pricing.schema.ts for new plan structure (free/standard/ai_powered)
+ */
 
 /**
  * Individual theme style properties for a single mode (light or dark)

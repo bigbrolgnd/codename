@@ -80,7 +80,7 @@ export const AgentChat: React.FC<AgentChatProps> = ({ tenantId }) => {
           >
             <Button
               size="icon"
-              className="h-14 w-14 rounded-full bg-emerald-600 hover:bg-emerald-500 shadow-xl shadow-emerald-900/40 border-4 border-zinc-950"
+              className="h-14 w-14 rounded-full bg-violet-600 hover:bg-violet-500 shadow-[0_0_30px_rgba(139,92,246,0.5)] border-4 border-zinc-950 transition-all hover:scale-105"
               onClick={() => setIsOpen(true)}
             >
               <MessageSquare className="h-6 w-6 text-white" />
@@ -95,23 +95,23 @@ export const AgentChat: React.FC<AgentChatProps> = ({ tenantId }) => {
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             className="w-80 md:w-96"
           >
-            <Card className="border-zinc-800 bg-zinc-950/90 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col h-[500px]">
+            <Card className="glass-panel glow-medium overflow-hidden flex flex-col h-[500px]">
               {/* Header */}
-              <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 flex items-center justify-between">
+              <div className="p-4 border-b border-white/5 glass-frosted flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500">
+                  <div className="p-1.5 rounded-lg glass-violet text-violet-400">
                     <Bot size={18} />
                   </div>
                   <div className="leading-none">
                     <h3 className="text-sm font-bold text-white">Business Agent</h3>
-                    <span className="text-[10px] text-emerald-500 font-mono font-bold uppercase tracking-widest">Online</span>
+                    <span className="text-[10px] text-violet-400 font-mono font-bold uppercase tracking-widest">Online</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500" onClick={() => setIsOpen(false)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white" onClick={() => setIsOpen(false)}>
                     <Minus size={16} />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500" onClick={() => setIsOpen(false)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white" onClick={() => setIsOpen(false)}>
                     <X size={16} />
                   </Button>
                 </div>
@@ -120,8 +120,8 @@ export const AgentChat: React.FC<AgentChatProps> = ({ tenantId }) => {
               {/* Messages */}
               <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
                 {messages.map((msg) => (
-                  <div 
-                    key={msg.id} 
+                  <div
+                    key={msg.id}
                     className={cn(
                       "flex gap-3",
                       msg.role === 'user' ? "flex-row-reverse" : "flex-row"
@@ -129,17 +129,17 @@ export const AgentChat: React.FC<AgentChatProps> = ({ tenantId }) => {
                   >
                     <div className={cn(
                       "h-8 w-8 shrink-0 rounded-lg flex items-center justify-center border",
-                      msg.role === 'user' 
-                        ? "bg-zinc-900 border-zinc-800 text-zinc-400" 
-                        : "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                      msg.role === 'user'
+                        ? "glass-frosted border-white/10 text-zinc-400"
+                        : "glass-violet border-violet-500/30 text-violet-400"
                     )}>
                       {msg.role === 'user' ? <User size={14} /> : <Sparkles size={14} />}
                     </div>
                     <div className={cn(
-                      "max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed",
+                      "max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed relative",
                       msg.role === 'user'
-                        ? "bg-emerald-600 text-white rounded-tr-none shadow-lg shadow-emerald-900/20"
-                        : "bg-zinc-900 text-zinc-200 border border-zinc-800 rounded-tl-none"
+                        ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white rounded-tr-none shadow-lg shadow-violet-900/30"
+                        : "glass-card text-zinc-200 rounded-tl-none"
                     )}>
                       {msg.content}
                     </div>
@@ -147,12 +147,12 @@ export const AgentChat: React.FC<AgentChatProps> = ({ tenantId }) => {
                 ))}
                 {mutation.isLoading && (
                   <div className="flex gap-3">
-                    <div className="h-8 w-8 shrink-0 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
+                    <div className="h-8 w-8 shrink-0 rounded-lg glass-violet border-violet-500/30 flex items-center justify-center text-violet-400">
                       <Bot size={14} />
                     </div>
-                    <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
-                      <Loader2 size={14} className="animate-spin text-zinc-500" />
-                      <span className="text-xs text-zinc-500 italic">Thinking...</span>
+                    <div className="glass-card p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
+                      <Loader2 size={14} className="animate-spin text-violet-400" />
+                      <span className="text-xs text-zinc-400 italic">Thinking...</span>
                     </div>
                   </div>
                 )}
@@ -160,26 +160,26 @@ export const AgentChat: React.FC<AgentChatProps> = ({ tenantId }) => {
               </CardContent>
 
               {/* Footer */}
-              <form onSubmit={handleSend} className="p-4 border-t border-zinc-800 bg-zinc-950">
+              <form onSubmit={handleSend} className="p-4 border-t border-white/5 glass-frosted">
                 <div className="relative">
-                  <Input 
+                  <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Message your agent..."
-                    className="bg-zinc-900 border-zinc-800 focus-visible:ring-emerald-500/50 pr-10 rounded-xl"
+                    className="glass-frosted border-white/10 focus-visible:ring-violet-500/50 focus-visible:border-violet-500/30 pr-10 rounded-xl text-white placeholder:text-zinc-500"
                   />
-                  <Button 
-                    type="submit" 
-                    size="icon" 
+                  <Button
+                    type="submit"
+                    size="icon"
                     variant="ghost"
                     aria-label="Send message"
-                    className="absolute right-1 top-1 h-8 w-8 text-emerald-500 hover:text-emerald-400"
+                    className="absolute right-1 top-1 h-8 w-8 text-violet-400 hover:text-violet-300"
                     disabled={!input.trim() || mutation.isLoading}
                   >
                     <Send size={16} />
                   </Button>
                 </div>
-                <p className="text-[9px] text-zinc-600 mt-2 text-center uppercase tracking-widest font-bold">
+                <p className="text-[9px] text-zinc-500 mt-2 text-center uppercase tracking-widest font-bold">
                   Contextual Agent v1.0 • obsidian secure
                 </p>
               </form>

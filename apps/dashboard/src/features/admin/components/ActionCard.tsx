@@ -11,7 +11,7 @@ interface ActionCardProps {
 }
 
 const typeConfig = {
-  booking: { icon: Calendar, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' },
+  booking: { icon: Calendar, color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
   review: { icon: Star, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
   system: { icon: Info, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
   alert: { icon: AlertTriangle, color: 'text-red-500', bgColor: 'bg-red-500/10' },
@@ -34,31 +34,31 @@ export const ActionCard: React.FC<ActionCardProps> = ({ item, onClick }) => {
   };
 
   return (
-    <Card 
-      className="bg-zinc-900/50 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 transition-all cursor-pointer group"
+    <Card
+      className="glass-card hover:glow-medium cursor-pointer group"
       onClick={onClick}
     >
-      <CardContent className="p-4 flex items-center justify-between gap-4">
+      <CardContent className="p-4 flex items-center justify-between gap-4 relative z-10">
         <div className="flex items-center gap-4 min-w-0">
-          <div className={cn("p-2.5 rounded-xl shrink-0", config.bgColor, config.color)}>
+          <div className={cn("p-2.5 rounded-xl shrink-0 glass-frosted", config.color)}>
             <Icon size={20} />
           </div>
           <div className="min-w-0 space-y-0.5">
             <div className="flex items-center gap-2">
               <h4 className="text-sm font-bold text-white truncate">{item.title}</h4>
-              <span className="text-[10px] text-zinc-500 font-mono uppercase">{formatTime(item.timestamp)}</span>
+              <span className="text-[10px] text-zinc-400 font-mono uppercase">{formatTime(item.timestamp)}</span>
             </div>
-            <p className="text-xs text-zinc-400 truncate leading-relaxed">
+            <p className="text-xs text-zinc-300 truncate leading-relaxed">
               {item.description}
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 shrink-0">
           {item.priority === 'high' && !item.isRead && (
-            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+            <div className="h-1.5 w-1.5 rounded-full bg-violet-500 shadow-[0_0_12px_rgba(139,92,246,0.8)] animate-pulse" />
           )}
-          <ChevronRight size={14} className="text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+          <ChevronRight size={14} className="text-zinc-500 group-hover:text-violet-400 transition-colors" />
         </div>
       </CardContent>
     </Card>

@@ -11,7 +11,9 @@ import {
   HeatmapItemSchema,
   ThemeCustomizationSchema,
   SaveThemeResponseSchema,
-  GetThemeResponseSchema
+  GetThemeResponseSchema,
+  PricingConfigSchema,
+  TenantAddonSchema
 } from '@codename/api';
 import { DatabaseManager } from '@codename/database';
 import { TRPCError } from '@trpc/server';
@@ -21,6 +23,7 @@ import { SummaryGeneratorService } from '../services/admin/summary-generator.ser
 import { BillingService } from '../services/admin/billing.service';
 import { ReputationService } from '../services/admin/reputation.service';
 import { ThemeService } from '../services/admin/theme.service';
+import { PricingService } from '../services/admin/pricing.service';
 
 const dbManager = new DatabaseManager();
 const intentService = new IntentService();
@@ -29,6 +32,7 @@ const summaryService = new SummaryGeneratorService();
 const billingService = new BillingService(dbManager);
 const reputationService = new ReputationService(dbManager);
 const themeService = new ThemeService(dbManager);
+const pricingService = new PricingService(dbManager, billingService);
 
 export const adminRouter = router({
   getTheme: publicProcedure
@@ -401,14 +405,113 @@ export const adminRouter = router({
     .mutation(async ({ input }) => {
       try {
         await dbManager.queryInSchema(input.tenantId,
-          `UPDATE reviews 
-           SET response_content = $1, response_at = NOW() 
+          `UPDATE reviews
+           SET response_content = $1, response_at = NOW()
            WHERE id = $2`,
           [input.response, input.reviewId]
         );
         return { success: true };
       } catch (error: any) {
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
+      }
+    }),
+
+  // Pricing endpoints
+  getPricingConfig: publicProcedure
+    .input(z.object({}).optional())
+    .output(z.object({
+      success: z.boolean(),
+      pricing: z.array(PricingConfigSchema),
+    }))
+    .query(async () => {
+      try {
+        const pricing = await pricingService.getAllPricing();
+        return { success: true, pricing };
+      } catch (error: any) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.message,
+        });
+      }
+    }),
+
+  getTenantAddons: publicProcedure
+    .input(z.object({
+      tenantId: z.string().regex(/^tenant_[a-z0-9_]+$/),
+    }))
+    .output(z.object({
+      success: z.boolean(),
+      addons: z.array(TenantAddonSchema),
+    }))
+    .query(async ({ input }) => {
+      try {
+        const addons = await pricingService.getTenantAddons(input.tenantId);
+        return { success: true, addons };
+      } catch (error: any) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.message,
+        });
+      }
+    }),
+
+  getTenantPlan: publicProcedure
+    .input(z.object({
+      tenantId: z.string().regex(/^tenant_[a-z0-9_]+$/),
+    }))
+    .output(z.object({
+      base_plan_type: z.enum(['free', 'standard', 'ai_powered']),
+      billing_interval: z.enum(['monthly', 'quarterly', 'annual']),
+    }))
+    .query(async ({ input }) => {
+      try {
+        const result = await dbManager.query(
+          'SELECT base_plan_type, billing_interval FROM public.tenants WHERE schema_name = $1',
+          [input.tenantId]
+        );
+        if (result.rows.length === 0) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Tenant not found' });
+        }
+        return result.rows[0];
+      } catch (error: any) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.message,
+        });
+      }
+    }),
+
+  subscribeToAddon: publicProcedure
+    .input(z.object({
+      tenantId: z.string().regex(/^tenant_[a-z0-9_]+$/),
+      addonId: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      try {
+        const subscription = await pricingService.subscribeToAddon(input.tenantId, input.addonId);
+        return { success: true, subscription };
+      } catch (error: any) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.message,
+        });
+      }
+    }),
+
+  unsubscribeFromAddon: publicProcedure
+    .input(z.object({
+      tenantId: z.string().regex(/^tenant_[a-z0-9_]+$/),
+      addonId: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      try {
+        await pricingService.unsubscribeFromAddon(input.tenantId, input.addonId);
+        return { success: true };
+      } catch (error: any) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.message,
+        });
       }
     }),
 });

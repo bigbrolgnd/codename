@@ -10,36 +10,40 @@ interface PixelStatusCardProps {
 
 export const PixelStatusCard: React.FC<PixelStatusCardProps> = ({ google, meta }) => {
   return (
-    <Card className="bg-zinc-950 border-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.05)]">
-      <CardHeader className="pb-3 border-b border-zinc-900">
-        <CardTitle className="text-xs font-black tracking-[0.2em] text-zinc-500 uppercase flex items-center gap-2">
-          <ShieldCheck size={14} className="text-emerald-500" /> Pixel Verification
+    <Card className="glass-card glow-soft">
+      <CardHeader className="pb-3 border-b border-white/5">
+        <CardTitle className="text-xs font-black tracking-[0.2em] text-zinc-400 uppercase flex items-center gap-2">
+          <ShieldCheck size={14} className="text-violet-400" /> Pixel Verification
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4 space-y-4">
+      <CardContent className="p-4 space-y-4 relative z-10">
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-sm font-bold text-white">Google Tag</span>
-            <span className="text-[10px] text-zinc-500">Global Site Tag active</span>
+            <span className="text-[10px] text-zinc-400">Global Site Tag active</span>
           </div>
-          <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 capitalize font-mono text-[10px]">
-            {google}
-          </Badge>
+          <div className="glass-panel px-2.5 py-1 rounded-lg">
+            <span className="text-xs font-mono font-bold text-violet-400">
+              {google}
+            </span>
+          </div>
         </div>
-        
+
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-sm font-bold text-white">Meta Pixel</span>
-            <span className="text-[10px] text-zinc-500">Facebook tracking active</span>
+            <span className="text-[10px] text-zinc-400">Facebook tracking active</span>
           </div>
-          <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 capitalize font-mono text-[10px]">
-            {meta}
-          </Badge>
+          <div className="glass-panel px-2.5 py-1 rounded-lg">
+            <span className="text-xs font-mono font-bold text-violet-400">
+              {meta}
+            </span>
+          </div>
         </div>
 
-        <div className="p-3 bg-zinc-900/50 rounded-lg flex items-start gap-2 border border-zinc-800">
-          <Info size={14} className="text-zinc-600 mt-0.5 shrink-0" />
-          <p className="text-[10px] text-zinc-500 leading-tight">
+        <div className="p-3 glass-frosted rounded-lg flex items-start gap-2">
+          <Info size={14} className="text-violet-400 mt-0.5 shrink-0" />
+          <p className="text-[10px] text-zinc-300 leading-tight">
             Your tracking pixels are automatically verified daily to ensure your conversion data remains accurate.
           </p>
         </div>

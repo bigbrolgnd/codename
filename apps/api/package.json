@@ -14,10 +14,12 @@
     "@codename/api": "*",
     "@codename/database": "*",
     "@trpc/server": "^10.0.0",
+    "@types/stripe": "^8.0.416",
     "cors": "^2.8.5",
     "culori": "^4.0.2",
     "express": "^4.18.2",
     "openai": "^6.15.0",
+    "stripe": "^20.1.2",
     "zod": "^3.22.4"
   },
   "devDependencies": {

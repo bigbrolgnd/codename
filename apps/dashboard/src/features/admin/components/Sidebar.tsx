@@ -6,29 +6,34 @@ import {
   Users,
   Rocket,
   Settings as SettingsIcon,
-  ChevronRight
+  ChevronRight,
+  Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AdminRoute, ADMIN_ROUTES } from '../constants/routes';
 import { Branding } from './Branding';
 import { trpc } from '@/lib/trpc';
+import { useTenant } from '@/contexts/TenantContext';
 
 interface SidebarProps {
   currentRoute: AdminRoute;
   onNavigate: (route: AdminRoute) => void;
   isMobile?: boolean;
-  tenantId?: string;
+  tenantId?: string; // Optional prop for testing - context is used by default
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   currentRoute,
   onNavigate,
   isMobile,
-  tenantId = 'tenant_default'
+  tenantId: propTenantId // Use prop if provided (for testing), otherwise use context
 }) => {
+  const { tenantId: contextTenantId } = useTenant();
+  const tenantId = propTenantId ?? contextTenantId;
+
   const { data: usage } = trpc.admin.getUsageStatus.useQuery(
-    { tenantId },
-    { refetchInterval: 30000 } // Refresh every 30s
+    { tenantId: tenantId ?? '' },
+    { enabled: !!tenantId, refetchInterval: 30000 } // Refresh every 30s
   );
 
   const aiPercentage = usage?.aiPercentage ?? 0;
@@ -40,17 +45,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: ADMIN_ROUTES.CALENDAR, label: 'Calendar', icon: CalendarIcon },
     { id: ADMIN_ROUTES.STAFF, label: 'Staff Management', icon: Users },
     { id: ADMIN_ROUTES.MARKETING, label: 'Marketing Hub', icon: Rocket },
+    { id: ADMIN_ROUTES.ADDONS, label: 'Add-ons', icon: Star },
     { id: ADMIN_ROUTES.SETTINGS, label: 'Settings', icon: SettingsIcon },
   ] as const;
   return (
     <aside className={cn(
-      "bg-zinc-950 border-r border-zinc-800 flex flex-col h-full",
+      "glass-surface border-r border-white/5 flex flex-col h-full",
       isMobile ? "w-full" : "w-64"
     )}>
       <div className="p-6">
         <Branding className="mb-8" />
 
-        <nav className="space-y-1">
+        <nav className="space-y-1.5">
           {menuItems.map((item) => {
             const isActive = currentRoute === item.id;
             const Icon = item.icon;
@@ -60,20 +66,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => onNavigate(item.id)}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  "w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group",
-                  isActive 
-                    ? "bg-zinc-900 text-white shadow-lg" 
-                    : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/50"
+                  "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden",
+                  isActive
+                    ? "glass-violet text-white glow-violet"
+                    : "text-zinc-400 hover:text-white glass-dark"
                 )}
               >
-                <div className="flex items-center gap-3">
+                {isActive && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-transparent" />
+                )}
+                <div className="flex items-center gap-3 relative z-10">
                   <Icon size={18} className={cn(
                     "transition-colors",
-                    isActive ? "text-emerald-500" : "group-hover:text-zinc-300"
+                    isActive ? "text-violet-400" : "group-hover:text-violet-300"
                   )} />
                   <span className="text-sm font-medium">{item.label}</span>
                 </div>
-                {isActive && <ChevronRight size={14} className="text-emerald-500" />}
+                {isActive && <ChevronRight size={14} className="text-violet-400 relative z-10" />}
               </button>
             );
           })}
@@ -81,26 +90,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       <div className="mt-auto p-6">
-        <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-3">
+        <div className="glass-panel p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold text-zinc-500">Plan: Growth</span>
+            <span className="text-[10px] uppercase font-bold text-zinc-400">Plan: Growth</span>
             <span className={cn(
               "text-[10px] uppercase font-bold",
-              aiPercentage >= 100 ? "text-destructive" : "text-emerald-500"
+              aiPercentage >= 100 ? "text-red-400" : "text-violet-400"
             )}>
               {aiPercentage >= 100 ? 'Capped' : 'Active'}
             </span>
           </div>
-          <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
-            <div 
+          <div className="h-1.5 w-full bg-zinc-800/50 rounded-full overflow-hidden">
+            <div
               className={cn(
-                "h-full transition-all duration-500",
-                aiPercentage >= 90 ? "bg-destructive" : "bg-emerald-500"
-              )} 
-              style={{ width: `${aiPercentage}%` }} 
+                "h-full rounded-full transition-all duration-500",
+                aiPercentage >= 90
+                  ? "bg-gradient-to-r from-red-500 to-orange-500"
+                  : "bg-gradient-to-r from-violet-500 to-fuchsia-500"
+              )}
+              style={{ width: `${aiPercentage}%` }}
             />
           </div>
-          <p className="text-[10px] text-zinc-500 leading-tight">
+          <p className="text-[10px] text-zinc-400 leading-tight">
             {aiPercentage}% of your AI token limit used.
           </p>
         </div>

@@ -13,6 +13,14 @@ vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+vi.mock('@/lib/trpc', () => ({
+  trpc: {
+    analytics: {
+      trackEvent: { useMutation: vi.fn().mockReturnValue({ mutate: vi.fn() }) }
+    }
+  }
+}));
+
 // Mock the useVisionExtraction hook
 const mockExtract = vi.fn();
 const mockReset = vi.fn();

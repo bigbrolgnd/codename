@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+/* =====================================================
+   DESIGN SYSTEM TOKENS - Cascade System
+   Based on: docs/product-discovery/component-library-spec.md
+   ===================================================== */
+
+@theme {
+  /* =====================================================
+     GLOBAL COLOR TOKENS
+     ===================================================== */
+  /* Semantic colors for znapsite.com */
+  --color-bg: #0a0a0a;
+  --color-surface: #1a1a1a;
+  --color-accent: #d552b7;
+  --color-accent-light: #e91e8c;
+  --color-accent-glow: rgba(213, 82, 183, 0.5);
+
+  /* Legacy glassmorphism tokens (for compatibility) */
+  --color-pink-bright: #e91e8c;
+  --color-pink-deep: #d552b7;
+  --color-pink-muted: #6c335e;
+  --color-pink-dark: #3d2336;
+  --color-black: #0a0a0a;
+
+  /* Glassmorphism Opacity Layers */
+  --glass-light: rgba(213, 82, 183, 0.15);
+  --glass-medium: rgba(213, 82, 183, 0.10);
+  --glass-dark: rgba(213, 82, 183, 0.05);
+
+  /* Glow Effects */
+  --glow-soft: 0 0 20px rgba(213, 82, 183, 0.3);
+  --glow-medium: 0 0 40px rgba(213, 82, 183, 0.5);
+  --glow-intense: 0 0 60px rgba(213, 82, 183, 0.7);
+
+  /* =====================================================
+     TEXT CASCADE SYSTEM
+     ===================================================== */
+  /* Base - all text inherits from here */
+  --text-all: #ffffff;
+
+  /* Level 1 - Semantic groupings */
+  --text-headings: var(--text-all);
+  --text-content: var(--text-all);
+  --text-interactive: var(--text-all);
+  --text-muted: #a0a0a0;
+
+  /* Level 2 - Specific elements */
+  --text-h1: var(--text-headings);
+  --text-h2: var(--text-headings);
+  --text-h3: var(--text-headings);
+  --text-h4: var(--text-headings);
+  --text-body: var(--text-content);
+  --text-caption: var(--text-muted);
+
+  /* =====================================================
+     ANIMATION TOKENS
+     ===================================================== */
+  /* Durations */
+  --anim-duration-instant: 50ms;
+  --anim-duration-fast: 150ms;
+  --anim-duration-normal: 300ms;
+  --anim-duration-slow: 500ms;
+  --anim-duration-slower: 750ms;
+
+  /* Easing */
+  --anim-easing-default: ease-out;
+  --anim-easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --anim-easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --anim-easing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --anim-easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Stagger delays for child animations */
+  --anim-stagger-fast: 50ms;
+  --anim-stagger-normal: 100ms;
+  --anim-stagger-slow: 150ms;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--text-all);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+}
+
+/* Base Glassmorphism Card */
+.glass-card {
+  background: rgba(213, 82, 183, 0.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(213, 82, 183, 0.2);
+  border-radius: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(213, 82, 183, 0.15);
+  border-color: rgba(213, 82, 183, 0.4);
+}
+
+.glass-card:active,
+.glass-card:focus {
+  border-color: #d552b7;
+  outline: 2px solid #d552b7;
+  outline-offset: 2px;
+}
+
+/* Accessibility: High Contrast Mode */
+@media (prefers-contrast: high) {
+  .glass-card {
+    background: rgba(213, 82, 183, 0.25);
+    border: 2px solid #d552b7;
+  }
+}
+
+/* GPU Acceleration for Animations */
+.will-change-gpu {
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Design System Utilities */
+.shadow-accent-glow {
+  text-shadow: 0 0 40px var(--color-accent-glow);
+}

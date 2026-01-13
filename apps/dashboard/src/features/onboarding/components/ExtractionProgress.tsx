@@ -38,7 +38,7 @@ export function ExtractionProgress({ status, imagePreview, onCancel }: Extractio
            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover opacity-50" />
            {status.phase !== 'complete' && status.phase !== 'error' && (
              <motion.div
-               className="absolute top-0 left-0 right-0 h-1 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"
+               className="absolute top-0 left-0 right-0 h-1 bg-pink-500 shadow-[0_0_10px_rgba(213,82,183,0.8)]"
                animate={{ top: ['0%', '100%'] }}
                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
              />
@@ -53,13 +53,13 @@ export function ExtractionProgress({ status, imagePreview, onCancel }: Extractio
                animate={{ scale: 1, opacity: 1 }}
                exit={{ scale: 0.8, opacity: 0 }}
                transition={{ type: "spring" }}
-               className="p-4 rounded-full bg-zinc-800/50 border border-zinc-700 text-emerald-400"
+               className="p-4 rounded-full bg-zinc-800/50 border border-zinc-700 text-pink-400"
              >
                 <Icon size={48} />
              </motion.div>
              {status.phase !== 'complete' && (
                  <motion.div
-                   className="absolute inset-0 rounded-full border-2 border-emerald-500/30"
+                   className="absolute inset-0 rounded-full border-2 border-pink-500/30"
                    animate={{ scale: [1, 1.2], opacity: [1, 0] }}
                    transition={{ duration: 1.5, repeat: Infinity }}
                  />
@@ -87,7 +87,7 @@ export function ExtractionProgress({ status, imagePreview, onCancel }: Extractio
         {/* Progress Bar */}
         <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mb-8">
             <motion.div
-                className="h-full bg-emerald-500"
+                className="h-full bg-pink-500"
                 initial={{ width: 0 }}
                 animate={{ width: `${phaseConfig.progress}%` }}
                 transition={{ duration: 0.5 }}

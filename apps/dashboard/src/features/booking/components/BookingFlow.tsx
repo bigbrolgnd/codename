@@ -6,6 +6,7 @@ import { CheckoutForm } from './CheckoutForm';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SiteFooter } from '@/components/SiteFooter';
 
 interface BookingFlowProps {
   tenantId: string;
@@ -36,6 +37,7 @@ export const BookingFlow: React.FC<BookingFlowProps> = ({ tenantId, simulateDela
            </div>
         </motion.div>
         <Button variant="outline" onClick={() => window.location.reload()}>Back to Home</Button>
+        <SiteFooter isFreeTier={true} tenantId={tenantId} />
       </div>
     );
   }
@@ -125,6 +127,7 @@ export const BookingFlow: React.FC<BookingFlowProps> = ({ tenantId, simulateDela
           )}
         </AnimatePresence>
       </main>
+      <SiteFooter isFreeTier={true} tenantId={tenantId} />
     </div>
   );
 };

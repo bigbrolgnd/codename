@@ -26,21 +26,34 @@ import { ThemePreview } from './components/ThemePreview';
 import { PublishConfirmDialog } from './components/PublishConfirmDialog';
 import { DesignStudioPaywall } from './components/DesignStudioPaywall';
 import { Loader2 } from 'lucide-react';
+import { useTenant } from '@/contexts/TenantContext';
 
 export function DesignStudio() {
-  const tenantId = 'tenant_default'; // Standard fallback for now
-  
-  const { 
-    data: subStatus, 
+  const { tenantId, isLoading: isTenantLoading } = useTenant();
+
+  // Show error if tenant not available
+  if (!tenantId) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <p className="text-zinc-400">Tenant information not available. Please log in.</p>
+      </div>
+    );
+  }
+
+  const {
+    data: subStatus,
     isLoading: isSubLoading,
     refetch: refetchSub
-  } = trpc.admin.getSubscriptionStatus.useQuery({ tenantId });
+  } = trpc.admin.getSubscriptionStatus.useQuery(
+    { tenantId },
+    { enabled: !!tenantId }
+  );
 
-  const { 
-    themeState, 
+  const {
+    themeState,
     themeId,
-    setCurrentMode, 
-    reset, 
+    setCurrentMode,
+    reset,
     saveCheckpoint,
     canUndo,
     canRedo,
@@ -49,7 +62,7 @@ export function DesignStudio() {
     isDirty,
     hasUnsavedChanges
   } = useThemeEditor();
-  
+
   const { isSaving } = useThemePersistence(tenantId);
 
   // Save checkpoint on mount
@@ -58,7 +71,7 @@ export function DesignStudio() {
   }, [saveCheckpoint]);
 
   // Handle access gate
-  if (isSubLoading) {
+  if (isSubLoading || isTenantLoading) {
     return (
       <div className="h-full flex items-center justify-center">
         <Loader2 className="animate-spin text-emerald-500" size={32} />
@@ -161,7 +174,7 @@ export function DesignStudio() {
           <Separator orientation="vertical" className="h-6" />
 
           {/* Publish */}
-          <PublishConfirmDialog disabled={!hasUnsavedChanges}>
+          <PublishConfirmDialog disabled={!hasUnsavedChanges} tenantId={tenantId}>
             <Button disabled={!hasUnsavedChanges}>
               <Save className="h-4 w-4 mr-2" />
               Publish

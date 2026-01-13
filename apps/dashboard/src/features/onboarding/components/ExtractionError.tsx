@@ -53,9 +53,9 @@ export function ExtractionErrorUI({ error, onRetry, onManualEntry, onUploadNew }
             >
                 {config.secondaryAction}
             </button>
-            <button 
+            <button
                 onClick={handlePrimary}
-                className="flex-1 py-3 px-4 rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-colors font-medium shadow-lg shadow-emerald-900/20"
+                className="flex-1 py-3 px-4 rounded-lg bg-pink-600 text-white hover:bg-pink-500 transition-colors font-medium shadow-lg shadow-pink-900/20 glow-soft"
             >
                 {config.primaryAction}
             </button>

@@ -1,0 +1,130 @@
+{
+  "updatedAt": "2026-01-10T00:00:00.000Z",
+  "basePlans": {
+    "free": {
+      "price": 0,
+      "display": "FREE",
+      "features": [
+        "5,000 visits/month",
+        "7 social integrations",
+        "AI-powered site building",
+        "SEO basics",
+        "Free subdomain"
+      ]
+    },
+    "standard": {
+      "price": 3900,
+      "display": "$39",
+      "features": [
+        "Unlimited visits",
+        "Everything in Free",
+        "Premium add-ons available",
+        "Priority support",
+        "Custom domain"
+      ]
+    },
+    "ai_powered": {
+      "price": 7900,
+      "display": "$79",
+      "features": [
+        "Unlimited visits",
+        "Everything in Standard",
+        "All premium add-ons included",
+        "AI features included",
+        "Design studio access"
+      ]
+    }
+  },
+  "components": {
+    "free": [
+      {
+        "id": "contact-form",
+        "name": "Contact Form",
+        "description": "Let visitors send you messages",
+        "icon": "✉️",
+        "category": "free",
+        "price": null,
+        "defaultEnabled": true
+      },
+      {
+        "id": "social-feed",
+        "name": "Social Feed",
+        "description": "Auto-sync Instagram posts to your site",
+        "icon": "📸",
+        "category": "free",
+        "price": null,
+        "defaultEnabled": false
+      }
+    ],
+    "premium": [
+      {
+        "id": "smart-calendar",
+        "name": "Smart Calendar",
+        "description": "Let customers book appointments with conflict-free scheduling",
+        "icon": "📅",
+        "category": "premium",
+        "price": 1499,
+        "priceDisplay": "$14.99/mo",
+        "defaultEnabled": true
+      },
+      {
+        "id": "review-gallery",
+        "name": "Review Gallery",
+        "description": "Display Google reviews with auto-sync",
+        "icon": "⭐",
+        "category": "premium",
+        "price": 699,
+        "priceDisplay": "$6.99/mo",
+        "defaultEnabled": true
+      },
+      {
+        "id": "payment-links",
+        "name": "Payment Links",
+        "description": "Accept deposits and payments via Stripe",
+        "icon": "💳",
+        "category": "premium",
+        "price": 799,
+        "priceDisplay": "$7.99/mo",
+        "defaultEnabled": false
+      },
+      {
+        "id": "blog",
+        "name": "Blog / News",
+        "description": "Share updates and articles",
+        "icon": "📝",
+        "category": "premium",
+        "price": 899,
+        "priceDisplay": "$8.99/mo",
+        "defaultEnabled": false
+      }
+    ],
+    "ai": [
+      {
+        "id": "ai-content-writer",
+        "name": "AI Content Writer",
+        "description": "Generate blog posts and articles automatically",
+        "icon": "🤖",
+        "category": "ai",
+        "price": 2500,
+        "priceDisplay": "$0.25/article",
+        "defaultEnabled": false
+      },
+      {
+        "id": "ai-seo-optimizer",
+        "name": "AI SEO Optimizer",
+        "description": "Auto-generate meta tags and descriptions",
+        "icon": "🔍",
+        "category": "ai",
+        "price": 300,
+        "priceDisplay": "$0.03/page",
+        "defaultEnabled": false
+      }
+    ],
+    "infrastructure": []
+  },
+  "billingIntervals": {
+    "monthly": { "multiplier": 1, "discount": 0 },
+    "quarterly": { "multiplier": 3, "discount": 0.1 },
+    "annual": { "multiplier": 12, "discount": 0.2 }
+  }
+}

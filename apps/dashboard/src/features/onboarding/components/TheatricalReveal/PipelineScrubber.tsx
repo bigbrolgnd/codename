@@ -36,8 +36,8 @@ export const PipelineScrubber = ({
         <div className="absolute top-5 left-0 w-full h-0.5 bg-zinc-800" />
         
         {/* Progress Line */}
-        <motion.div 
-          className="absolute top-5 left-0 h-0.5 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+        <motion.div
+          className="absolute top-5 left-0 h-0.5 bg-pink-500 shadow-[0_0_8px_rgba(213,82,183,0.5)]"
           initial={{ width: 0 }}
           animate={{ width: `${overallProgress}%` }}
           transition={{ duration: 0.3, ease: "linear" }}
@@ -48,14 +48,14 @@ export const PipelineScrubber = ({
             const config = PHASE_CONFIG[phase];
             const isCompleted = index < currentPhaseIndex || (index === PHASES.length - 1 && overallProgress === 100);
             const isActive = index === currentPhaseIndex && overallProgress < 100;
-            
+
             return (
               <div key={phase} className="flex flex-col items-center group">
                 <motion.div
                   className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center z-10 border-2 transition-colors duration-300",
-                    isCompleted ? "bg-emerald-500 border-emerald-500" : 
-                    isActive ? "bg-zinc-900 border-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]" : 
+                    isCompleted ? "bg-pink-500 border-pink-500" :
+                    isActive ? "bg-zinc-900 border-pink-500 shadow-[0_0_12px_rgba(213,82,183,0.4)]" :
                     "bg-zinc-900 border-zinc-800"
                   )}
                   initial={false}
@@ -67,11 +67,11 @@ export const PipelineScrubber = ({
                   ) : (
                     getIcon(config.icon, cn(
                       "h-5 w-5",
-                      isActive ? "text-emerald-400" : "text-zinc-600"
+                      isActive ? "text-pink-400" : "text-zinc-600"
                     ))
                   )}
                 </motion.div>
-                
+
                 <div className="mt-3 text-center">
                   <span className={cn(
                     "text-xs font-medium transition-colors duration-300",
@@ -80,9 +80,9 @@ export const PipelineScrubber = ({
                     {config.label}
                   </span>
                   {isActive && (
-                    <motion.div 
+                    <motion.div
                       layoutId="active-indicator"
-                      className="text-[10px] text-emerald-500 font-mono mt-0.5"
+                      className="text-[10px] text-pink-500 font-mono mt-0.5"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >

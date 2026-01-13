@@ -1,0 +1,41 @@
+/**
+ * Design System Color Tokens
+ * Based on: docs/product-discovery/component-library-spec.md
+ *
+ * Usage: Import in your app's CSS or use via CSS modules
+ */
+
+:root {
+  /* =====================================================
+     GLOBAL COLOR TOKENS
+     ===================================================== */
+
+  /* Semantic colors */
+  --color-bg: #0a0a0a;
+  --color-surface: #1a1a1a;
+  --color-accent: #e91e8c;
+  --color-accent-light: #ff6bbd;
+  --color-accent-glow: rgba(233, 30, 140, 0.5);
+
+  /* Text colors - cascade system */
+  --text-all: #ffffff;
+  --text-headings: var(--text-all);
+  --text-content: var(--text-all);
+  --text-interactive: var(--text-all);
+  --text-muted: #a0a0a0;
+
+  /* Text elements */
+  --text-h1: var(--text-headings);
+  --text-h2: var(--text-headings);
+  --text-h3: var(--text-headings);
+  --text-h4: var(--text-headings);
+  --text-body: var(--text-content);
+  --text-caption: var(--text-muted);
+}
+
+/* Dark mode overrides (if needed) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Already dark by default */
+  }
+}

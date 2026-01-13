@@ -7,6 +7,7 @@ import { useVisionExtraction } from '../hooks/useVisionExtraction';
 import { ExtractionProgress } from './ExtractionProgress';
 import { ExtractionErrorUI } from './ExtractionError';
 import { ExtractionResult } from '@codename/api';
+import { trpc } from '@/lib/trpc';
 
 interface ServiceUploadProps {
   onUploadComplete: (result: ExtractionResult) => void;
@@ -20,9 +21,16 @@ const ServiceUpload: React.FC<ServiceUploadProps> = ({ onUploadComplete, onManua
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [inputMode, setInputMode] = useState<InputMode>('upload');
   const [textDescription, setTextDescription] = useState('');
+  
+  const analytics = trpc.analytics.trackEvent.useMutation();
+
+  React.useEffect(() => {
+      analytics.mutate({ eventName: 'funnel_step', properties: { step: 'hero_view' } });
+  }, []);
 
   const { extract, status, isProcessing, reset } = useVisionExtraction({
     onComplete: (result) => {
+      analytics.mutate({ eventName: 'funnel_step', properties: { step: 'extraction_complete' } });
       // Keep "complete" state visible briefly before transition
       setTimeout(() => {
         onUploadComplete(result);
@@ -31,6 +39,7 @@ const ServiceUpload: React.FC<ServiceUploadProps> = ({ onUploadComplete, onManua
   });
 
   const processFile = useCallback(async (selectedFile: File) => {
+    analytics.mutate({ eventName: 'funnel_step', properties: { step: 'upload_start' } });
     const validation = validateFile(selectedFile);
 
     if (!validation.valid) {
@@ -129,18 +138,18 @@ const ServiceUpload: React.FC<ServiceUploadProps> = ({ onUploadComplete, onManua
             <div
               {...getRootProps()}
               className={`relative block group cursor-pointer ${
-                isDragActive ? 'ring-2 ring-emerald-500 ring-offset-2 ring-offset-zinc-950' : ''
+                isDragActive ? 'ring-2 ring-pink-500 ring-offset-2 ring-offset-zinc-950' : ''
               }`}
             >
               <div className={`w-full aspect-[4/3] rounded-2xl border-2 border-dashed ${
-                isDragActive ? 'border-emerald-500 bg-emerald-500/10' : 'border-zinc-800 group-hover:border-emerald-500/50 bg-zinc-900/50'
+                isDragActive ? 'border-pink-500 bg-pink-500/10' : 'border-zinc-800 group-hover:border-pink-500/50 bg-zinc-900/50'
               } flex flex-col items-center justify-center transition-all overflow-hidden`}>
-                <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                 <div className="relative flex flex-col items-center space-y-4">
                   <div className={`p-4 rounded-full ${
-                    isDragActive ? 'bg-emerald-500/20 scale-110' : 'bg-zinc-800'
-                  } text-emerald-500 group-hover:scale-110 transition-transform`}>
+                    isDragActive ? 'bg-pink-500/20 scale-110' : 'bg-zinc-800'
+                  } text-pink-500 group-hover:scale-110 transition-transform`}>
                     {isDragActive ? <Upload size={48} /> : <Camera size={48} />}
                   </div>
                   <div className="text-center">
@@ -160,7 +169,7 @@ const ServiceUpload: React.FC<ServiceUploadProps> = ({ onUploadComplete, onManua
             <div className="flex items-center justify-center space-x-4 text-sm text-zinc-500">
               <button
                 onClick={() => setInputMode('text')}
-                className="hover:text-emerald-500 transition-colors flex items-center space-x-2"
+                className="hover:text-pink-500 transition-colors flex items-center space-x-2"
               >
                 <FileText size={16} />
                 <span>I don't have a price list handy</span>
@@ -191,13 +200,13 @@ Haircut - $25
 Color - $75
 Highlights - $120
 Blowout - $45"
-                className="w-full h-48 rounded-xl bg-zinc-900 border border-zinc-800 p-4 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 resize-none"
+                className="w-full h-48 rounded-xl bg-zinc-900 border border-zinc-800 p-4 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 resize-none"
               />
 
               <button
                 onClick={handleTextSubmit}
                 disabled={!textDescription.trim()}
-                className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-900/20 active:scale-95"
+                className="w-full py-4 bg-pink-600 hover:bg-pink-500 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-pink-900/20 active:scale-95 glow-soft"
               >
                 Analyze Services
               </button>
@@ -206,7 +215,7 @@ Blowout - $45"
             <div className="flex items-center justify-center space-x-4 text-sm text-zinc-500">
               <button
                 onClick={() => setInputMode('upload')}
-                className="hover:text-emerald-500 transition-colors flex items-center space-x-2"
+                className="hover:text-pink-500 transition-colors flex items-center space-x-2"
               >
                 <Camera size={16} />
                 <span>Upload an image instead</span>

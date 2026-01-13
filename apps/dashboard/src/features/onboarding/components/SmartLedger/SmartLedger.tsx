@@ -87,13 +87,13 @@ export const SmartLedger = ({ extractionResult, onBuild, onBack }: SmartLedgerPr
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-background overflow-hidden relative">
       {/* Left Panel (Source Image) */}
-      <div 
+      <div
         className={cn(
-          "transition-all duration-300 ease-in-out bg-slate-900",
-          isImageCollapsed 
-            ? "h-14 md:h-full md:w-14 min-h-[3.5rem]" 
+          "transition-all duration-300 ease-in-out bg-zinc-900",
+          isImageCollapsed
+            ? "h-14 md:h-full md:w-14 min-h-[3.5rem]"
             : "h-[35vh] md:h-full md:w-[40%] min-h-[35vh]",
-          "relative flex-shrink-0 z-20 border-r border-slate-800 shadow-xl"
+          "relative flex-shrink-0 z-20 border-r border-zinc-800 shadow-xl"
         )}
       >
         <SourceImagePanel

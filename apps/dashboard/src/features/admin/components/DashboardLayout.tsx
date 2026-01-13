@@ -4,29 +4,68 @@ import { PulseHeader } from './PulseHeader';
 import { OverviewPage } from '../pages/OverviewPage';
 import { InsightsPage } from '../pages/InsightsPage';
 import { MarketingPage } from '../pages/MarketingPage';
+import { AddonsPage } from '../pages/AddonsPage';
 import { ComingSoon } from './ComingSoon';
 import { StaffList } from './StaffList';
+import { LightningBackground } from './LightningBackground';
 import { useAdminRouter } from '../hooks/useAdminRouter';
 import { usePulseMetrics } from '../hooks/usePulseMetrics';
 import { ADMIN_ROUTES } from '../constants/routes';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetTrigger 
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { AgentChat } from './AgentChat';
+import { SocialSharingWizard } from './SocialSharingWizard';
+import { useTenant } from '@/contexts/TenantContext';
 
 export const DashboardLayout: React.FC = () => {
 
   const { currentRoute, navigate } = useAdminRouter();
+  const { tenantId } = useTenant();
 
-  const tenantId = 'tenant_default'; // TODO: Get from auth context
+  const metrics = usePulseMetrics(tenantId ?? '');
+  const [showWizard, setShowWizard] = React.useState(false);
 
-  const metrics = usePulseMetrics(tenantId); 
+  // Show error if tenant not available
+  if (!tenantId) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p className="text-zinc-400">Tenant information not available. Please log in.</p>
+      </div>
+    );
+  }
 
+  React.useEffect(() => {
+    const hasSeen = localStorage.getItem('hasSeenSocialWizard_' + tenantId);
+    if (!hasSeen) {
+       // Delay slightly for effect
+       const timer = setTimeout(() => {
+         setShowWizard(true);
+       }, 1500);
+       return () => clearTimeout(timer);
+    }
 
+    // 7 Days Trigger
+    const installDate = localStorage.getItem('installDate_' + tenantId);
+    if (!installDate) {
+        localStorage.setItem('installDate_' + tenantId, new Date().toISOString());
+    } else {
+        const days = (new Date().getTime() - new Date(installDate).getTime()) / (1000 * 3600 * 24);
+        if (days > 7 && !localStorage.getItem('hasSeenSocialWizard_7days_' + tenantId)) {
+             setShowWizard(true);
+             localStorage.setItem('hasSeenSocialWizard_7days_' + tenantId, 'true');
+        }
+    }
+  }, [tenantId]);
+
+  const handleCloseWizard = () => {
+    setShowWizard(false);
+    localStorage.setItem('hasSeenSocialWizard_' + tenantId, 'true');
+  };
 
   const renderContent = () => {
 
@@ -52,6 +91,10 @@ export const DashboardLayout: React.FC = () => {
 
         return <MarketingPage tenantId={tenantId} />;
 
+      case ADMIN_ROUTES.ADDONS:
+
+        return <AddonsPage />;
+
       case ADMIN_ROUTES.SETTINGS:
 
         return <ComingSoon feature="Settings" onBack={() => navigate(ADMIN_ROUTES.OVERVIEW)} />;
@@ -67,8 +110,9 @@ export const DashboardLayout: React.FC = () => {
 
 
   return (
-
-    <div className="flex h-screen bg-zinc-950 overflow-hidden text-zinc-50 selection:bg-emerald-500/30">
+    <>
+      <LightningBackground />
+      <div className="flex h-screen bg-transparent overflow-hidden text-zinc-50 selection:bg-violet-500/30">
 
       {/* Desktop Sidebar */}
 
@@ -88,7 +132,7 @@ export const DashboardLayout: React.FC = () => {
 
         {/* Mobile Nav */}
 
-        <div className="md:hidden p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950 sticky top-0 z-20">
+        <div className="md:hidden p-4 border-b border-white/5 flex items-center justify-between glass-frosted sticky top-0 z-20">
 
            <Sheet>
 
@@ -102,7 +146,7 @@ export const DashboardLayout: React.FC = () => {
 
              </SheetTrigger>
 
-             <SheetContent side="left" className="p-0 w-64 bg-zinc-950 border-r-zinc-800">
+             <SheetContent side="left" className="p-0 w-64 glass-surface border-r-white/5">
 
                <Sidebar 
 
@@ -141,10 +185,12 @@ export const DashboardLayout: React.FC = () => {
 
 
         <AgentChat tenantId={tenantId} />
+        <SocialSharingWizard tenantId={tenantId} isOpen={showWizard} onClose={handleCloseWizard} />
 
       </div>
 
     </div>
+    </>
 
   );
 

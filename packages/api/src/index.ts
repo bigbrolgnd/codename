@@ -6,4 +6,6 @@ export * from './schemas/site.schema';
 export * from './schemas/admin.schema';
 export * from './schemas/marketing.schema';
 export * from './schemas/theme.schema';
+export * from './schemas/pricing.schema';
+export * from './schemas/component.schema';
 export * from './utils/color-utils';

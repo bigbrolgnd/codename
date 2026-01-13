@@ -4,6 +4,7 @@ export const ADMIN_ROUTES = {
   CALENDAR: 'calendar',
   STAFF: 'staff',
   MARKETING: 'marketing',
+  ADDONS: 'addons',
   SETTINGS: 'settings',
 } as const;
 

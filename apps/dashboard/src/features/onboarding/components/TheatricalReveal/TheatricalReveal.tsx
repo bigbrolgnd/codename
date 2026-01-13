@@ -85,13 +85,13 @@ export const TheatricalReveal = ({
   }, [provisioningError, onError]);
 
   return (
-    <motion.div 
+    <motion.div
       layoutId="reveal-container"
       className="fixed inset-0 z-[100] bg-zinc-950 text-white flex flex-col overflow-hidden"
     >
       {/* Background Ambience */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-1/2 h-1/2 bg-emerald-500/5 blur-[120px] rounded-full" />
+        <div className="absolute top-0 left-1/4 w-1/2 h-1/2 bg-pink-500/5 blur-[120px] rounded-full" />
         <div className="absolute bottom-0 right-1/4 w-1/2 h-1/2 bg-blue-500/5 blur-[120px] rounded-full" />
       </div>
 

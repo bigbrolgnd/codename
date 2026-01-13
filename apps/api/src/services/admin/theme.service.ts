@@ -1,5 +1,6 @@
 import { DatabaseManager } from '@codename/database';
 import { ThemeCustomization, SaveThemeRequest, SaveThemeResponse, GetThemeResponse } from '@codename/api';
+import { generateThemeCSS } from './theme-to-css.util';
 
 export class ThemeService {
   constructor(private db: DatabaseManager) {}
@@ -72,6 +73,7 @@ export class ThemeService {
 
   /**
    * Publishes a specific theme version for a tenant
+   * Triggers n8n orchestration to apply theme CSS to tenant containers
    */
   async publishTheme(tenantId: string, themeId: string): Promise<SaveThemeResponse> {
     // 1. Mark specific theme as published
@@ -89,20 +91,36 @@ export class ThemeService {
       throw new Error('No theme found to publish');
     }
 
-    // 2. Trigger n8n Orchestration for container CSS update
+    // 2. Validate theme data before orchestration
     const row = result.rows[0];
+    if (!row.styles || typeof row.styles !== 'object') {
+      throw new Error('Invalid theme data: styles must be an object');
+    }
+    if (!row.hsl_adjustments || typeof row.hsl_adjustments !== 'object') {
+      throw new Error('Invalid theme data: hsl_adjustments must be an object');
+    }
+
+    // 3. Generate CSS string for n8n workflow
+    const generatedCSS = generateThemeCSS(row.styles, row.hsl_adjustments);
+
+    // 4. Trigger n8n Orchestration for container CSS update
     const themeData = {
       tenantId,
       styles: row.styles,
       hslAdjustments: row.hsl_adjustments,
-      version: row.version
+      version: row.version,
+      css: generatedCSS, // Include generated CSS in payload
+      generatedAt: new Date().toISOString()
     };
 
-    console.log(`[ThemeService] Triggering n8n ApplyTheme for ${tenantId}`, themeData);
-    
-    // In a real environment, we'd use a dedicated OrchestrationService or fetch
-    // For this implementation, we simulate the successful handoff
-    this.dispatchOrchestrationEvent('THEME_PUBLISHED', themeData);
+    console.log(`[ThemeService] Triggering n8n ApplyTheme for ${tenantId}`, {
+      tenantId,
+      version: row.version,
+      cssLength: generatedCSS.length
+    });
+
+    // 5. Dispatch orchestration event to n8n (await to prevent race condition)
+    await this.dispatchOrchestrationEvent('THEME_PUBLISHED', themeData);
 
     const rowAfter = result.rows[0];
     return {
@@ -123,21 +141,64 @@ export class ThemeService {
 
   /**
    * Dispatches events to the orchestration engine (n8n)
+   * Sends webhook with retry logic and comprehensive error handling
    */
-  private async dispatchOrchestrationEvent(event: string, payload: any) {
-    // This represents the boundary to our n8n instance
+  private async dispatchOrchestrationEvent(event: string, payload: any): Promise<void> {
+    const webhookUrl = process.env.N8N_WEBHOOK_URL;
+    const secret = process.env.ORCHESTRATION_SECRET;
+
     // Log for audit defense requirements
     console.info(`[ORCHESTRATION][${new Date().toISOString()}] Event: ${event} | Tenant: ${payload.tenantId}`);
-    
-    // Example implementation:
-    // try {
-    //   await fetch(process.env.N8N_WEBHOOK_URL, {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json', 'X-BMAD-SECRET': process.env.ORCHESTRATION_SECRET },
-    //     body: JSON.stringify({ event, payload })
-    //   });
-    // } catch (e) {
-    //   console.error('Failed to trigger orchestration', e);
-    // }
+
+    // If no webhook URL configured, log warning but don't fail (development mode)
+    if (!webhookUrl) {
+      console.warn('[ORCHESTRATION] N8N_WEBHOOK_URL not configured - skipping webhook dispatch');
+      console.info('[ORCHESTRATION] Payload that would be sent:', JSON.stringify({ event, payload }, null, 2));
+      return;
+    }
+
+    // Send webhook to n8n with retry logic
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(secret && { 'X-BMAD-SECRET': secret }),
+            'User-Agent': 'codename-theme-service/1.0'
+          },
+          body: JSON.stringify({ event, payload }),
+          // Timeout after 10 seconds
+          signal: AbortSignal.timeout(10000)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Unable to read error response');
+          throw new Error(`n8n webhook returned ${response.status}: ${errorText}`);
+        }
+
+        // Success - log confirmation
+        console.info(`[ORCHESTRATION] Webhook sent successfully (attempt ${attempt}/${maxRetries})`);
+        return;
+
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        console.error(`[ORCHESTRATION] Webhook attempt ${attempt}/${maxRetries} failed:`, lastError.message);
+
+        // If this isn't the last attempt, wait before retrying
+        if (attempt < maxRetries) {
+          // Exponential backoff: 1s, 2s, 4s
+          const backoffMs = Math.pow(2, attempt - 1) * 1000;
+          await new Promise(resolve => setTimeout(resolve, backoffMs));
+        }
+      }
+    }
+
+    // All retries exhausted - log error but don't throw (theme is still published in DB)
+    console.error(`[ORCHESTRATION] Failed to send webhook after ${maxRetries} attempts:`, lastError?.message);
+    console.error('[ORCHESTRATION] Theme was marked published in DB but n8n orchestration failed - manual intervention may be required');
   }
 }

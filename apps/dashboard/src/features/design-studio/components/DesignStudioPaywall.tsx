@@ -126,7 +126,7 @@ export const DesignStudioPaywall: React.FC<DesignStudioPaywallProps> = ({
       </Card>
 
       <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-        Included automatically in the <span className="text-zinc-300">Pro Tier ($199/mo)</span>
+        Included automatically in the <span className="text-zinc-300">AI-Powered Plan ($79/mo)</span>
       </p>
     </div>
   );

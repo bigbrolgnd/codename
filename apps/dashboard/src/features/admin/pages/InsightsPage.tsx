@@ -7,9 +7,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendSparkline } from '../components/TrendSparkline';
 import { ConversionFunnel } from '../components/ConversionFunnel';
 import { BuyerHeatmap } from '../components/BuyerHeatmap';
+import { useTenant } from '@/contexts/TenantContext';
 
 export const InsightsPage: React.FC = () => {
-  const { summaries, pixelStatus, isLoading } = useInsights('tenant_default');
+  const { tenantId } = useTenant();
+
+  // Show error if tenant not available
+  if (!tenantId) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-4">
+        <p className="text-zinc-400">Tenant information not available. Please log in.</p>
+      </div>
+    );
+  }
+
+  const { summaries, pixelStatus, isLoading } = useInsights(tenantId);
 
   if (isLoading) {
     return (
@@ -62,13 +74,13 @@ export const InsightsPage: React.FC = () => {
       </div>
 
       <div className="pt-4">
-        <BuyerHeatmap tenantId="tenant_default" />
+        <BuyerHeatmap tenantId={tenantId} />
       </div>
 
       <div className="pt-4">
-        <PixelStatusCard 
-          google={pixelStatus.google} 
-          meta={pixelStatus.meta} 
+        <PixelStatusCard
+          google={pixelStatus.google}
+          meta={pixelStatus.meta}
         />
       </div>
     </div>
