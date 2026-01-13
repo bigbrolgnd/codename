@@ -630,6 +630,23 @@ curl -X POST https://n8n.b2ainvestments.com/webhook/theme-apply \
 4. **Database Connection**: Verify PostgreSQL credentials are correct
 5. **API Token Error**: Ensure `api_token` in tenants table is valid for Replit
 
+### n8n 2.2.6 Known Bug: Cannot Publish Imported Workflows
+
+**Problem**: n8n Community Edition 2.2.6 (and 2.3.1) has a bug where imported workflows cannot be published. Error: "Workflow could not be published: Version not found" or "You don't have permission to publish this workflow."
+
+**Workaround**:
+1. Import the workflow
+2. Open the workflow in the n8n editor
+3. Make a dummy edit (add/remove a tag, or drag any node slightly)
+4. Save the workflow
+5. Then publish - it should work
+
+**Root Cause**: This is a known bug in n8n Community Edition. See:
+- [n8n Community #248302](https://community.n8n.io/t/cannot-publish-new-workflows-in-community-version/248302)
+- [GitHub Issue #22393](https://github.com/n8n-io/n8n/issues/22393)
+
+**Alternative Solution**: Downgrade to n8n 2.1.x if this becomes a persistent blocker.
+
 ---
 
 ## Workflow Architecture

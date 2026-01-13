@@ -404,6 +404,18 @@ N8N_WEBHOOK_URL=https://n8n.b2ainvestments.com/webhook
 - Check credential is not deleted
 - Test credential via n8n UI
 
+### Publishing Issues (n8n 2.2.6 Known Bug)
+**Problem**: n8n Community Edition 2.2.6 has a bug where imported workflows cannot be published. Error: "Workflow could not be published: Version not found" or "You don't have permission to publish this workflow."
+
+**Workaround**:
+1. Import the workflow
+2. Open the workflow in the n8n editor
+3. Make a dummy edit (add/remove a tag, or drag any node slightly)
+4. Save the workflow
+5. Then publish - it should work
+
+**Reference**: [n8n Community #248302](https://community.n8n.io/t/cannot-publish-new-workflows-in-community-version/248302), [GitHub Issue #22393](https://github.com/n8n-io/n8n/issues/22393)
+
 ---
 
 ## Best Practices
