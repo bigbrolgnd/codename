@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { AddonsPage } from './AddonsPage';
 import { trpc } from '@/lib/trpc';
+import { TenantProvider } from '@/contexts/TenantContext';
 
 // Mock tRPC
 vi.mock('@/lib/trpc', () => ({
@@ -87,15 +88,20 @@ describe('AddonsPage', () => {
     });
   });
 
+  // Helper function to render with TenantProvider
+  const renderWithProvider = (component: React.ReactElement) => {
+    return render(<TenantProvider>{component}</TenantProvider>);
+  };
+
   it('renders page header and title', async () => {
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     expect(screen.getByText('Add-ons')).toBeInTheDocument();
     expect(screen.getByText('Manage your subscription and add-ons')).toBeInTheDocument();
   });
 
   it('shows current plan badge', () => {
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     expect(screen.getByText('Standard Plan')).toBeInTheDocument();
   });
@@ -106,7 +112,7 @@ describe('AddonsPage', () => {
       isLoading: false,
     });
 
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     expect(screen.getByText('AI-Powered Plan')).toBeInTheDocument();
   });
@@ -117,20 +123,20 @@ describe('AddonsPage', () => {
       isLoading: true,
     });
 
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     expect(screen.getByText('Loading add-ons...')).toBeInTheDocument();
   });
 
   it('displays add-on cards for each category', () => {
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     expect(screen.getByText('Contact Form')).toBeInTheDocument();
     expect(screen.getByText('Smart Calendar')).toBeInTheDocument();
   });
 
   it('filters add-ons by search query', async () => {
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     const searchInput = screen.getByPlaceholderText('Search add-ons...');
     fireEvent.change(searchInput, { target: { value: 'calendar' } });
@@ -142,7 +148,7 @@ describe('AddonsPage', () => {
   });
 
   it('filters add-ons by category', async () => {
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     const premiumFilter = screen.getByText('premium');
     fireEvent.click(premiumFilter);
@@ -154,7 +160,7 @@ describe('AddonsPage', () => {
   });
 
   it('shows "No add-ons found" when search has no results', async () => {
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     const searchInput = screen.getByPlaceholderText('Search add-ons...');
     fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
@@ -182,7 +188,7 @@ describe('AddonsPage', () => {
       isLoading: false,
     });
 
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     expect(screen.getByText('Active Add-ons')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
@@ -206,7 +212,7 @@ describe('AddonsPage', () => {
       isLoading: false,
     });
 
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     expect(screen.getByText('Monthly Total')).toBeInTheDocument();
     expect(screen.getByText('$14.99/mo')).toBeInTheDocument();
@@ -218,20 +224,20 @@ describe('AddonsPage', () => {
       isLoading: false,
     });
 
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     expect(screen.getByText('Monthly Total')).toBeInTheDocument();
     expect(screen.getByText('Included')).toBeInTheDocument();
   });
 
   it('shows "View Invoices" button', () => {
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     expect(screen.getByText('View Invoices')).toBeInTheDocument();
   });
 
   it('groups add-ons by category with section headers', () => {
-    render(<AddonsPage />);
+    renderWithProvider(<AddonsPage />);
 
     expect(screen.getByText('free Add-ons')).toBeInTheDocument();
     expect(screen.getByText('premium Add-ons')).toBeInTheDocument();

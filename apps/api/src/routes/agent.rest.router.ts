@@ -10,9 +10,9 @@ import { DatabaseManager } from '@codename/database';
 import { GLMVisionService } from '../services/agent/glm-vision.service';
 import { LocalBuilderService } from '../services/agent/local-builder.service';
 import {
-  GenerateSiteSchema,
-  GetSchemaSchema,
-  ExtractFromImageSchema,
+  GenerateSiteRequestSchema,
+  GetSchemaRequestSchema,
+  ExtractFromImageRequestSchema,
   ErrorResponseSchema,
   GenerateSiteResponseSchema,
   GetSchemaResponseSchema,
@@ -113,7 +113,7 @@ router.use((error: any, req: Request, res: Response, next: NextFunction) => {
  */
 router.post(
   '/generate-site',
-  validateBody(GenerateSiteSchema),
+  validateBody(GenerateSiteRequestSchema),
   asyncHandler(async (req: Request, res: Response) => {
     const { tenantId, templateId, variables, businessContext } = req.body;
 
@@ -324,7 +324,7 @@ router.get(
  */
 router.post(
   '/extract',
-  validateBody(ExtractFromImageSchema),
+  validateBody(ExtractFromImageRequestSchema),
   asyncHandler(async (req: Request, res: Response) => {
     const { imageUrl, extractionType } = req.body;
 
@@ -386,8 +386,8 @@ router.post(
         return {
           type: image.type,
           url: image.url,
-          data: result.data,
-          confidence: result.confidence,
+          data: result?.data,
+          confidence: result?.confidence,
         };
       })
     );

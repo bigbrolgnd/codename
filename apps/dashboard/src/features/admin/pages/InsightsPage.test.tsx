@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InsightsPage } from './InsightsPage';
 import { trpc } from '@/lib/trpc';
+import { TenantProvider } from '@/contexts/TenantContext';
 
 // Mock tRPC
 vi.mock('@/lib/trpc', () => ({
@@ -35,8 +36,13 @@ describe('InsightsPage', () => {
     });
   });
 
+  // Helper function to render with TenantProvider
+  const renderWithProvider = (component: React.ReactElement) => {
+    return render(<TenantProvider>{component}</TenantProvider>);
+  };
+
   it('renders insights summaries', () => {
-    render(<InsightsPage />);
+    renderWithProvider(<InsightsPage />);
     
     expect(screen.getByText('Plain English Insights')).toBeInTheDocument();
     expect(screen.getByText(/You're popular!/)).toBeInTheDocument();
@@ -44,7 +50,7 @@ describe('InsightsPage', () => {
   });
 
   it('renders pixel verification status', () => {
-    render(<InsightsPage />);
+    renderWithProvider(<InsightsPage />);
     expect(screen.getByText('Pixel Verification')).toBeInTheDocument();
     expect(screen.getByText('Google Tag')).toBeInTheDocument();
     expect(screen.getByText('Meta Pixel')).toBeInTheDocument();

@@ -118,7 +118,7 @@ docker compose logs n8n --tail 50 -f
   "connections": {...},
   "settings": {...},
   "staticData": {},
-  "tags": [],
+  "tags": [],  // CRITICAL: MUST be empty array - tags prevent publishing in n8n 2.2.6
   "meta": {...},
   "pinData": {},
   "active": false,
@@ -407,12 +407,16 @@ N8N_WEBHOOK_URL=https://n8n.b2ainvestments.com/webhook
 ### Publishing Issues (n8n 2.2.6 Known Bug)
 **Problem**: n8n Community Edition 2.2.6 has a bug where imported workflows cannot be published. Error: "Workflow could not be published: Version not found" or "You don't have permission to publish this workflow."
 
+**CRITICAL - TAGS CAUSE PUBLISHING FAILURES**:
+Workflows with **ANY tags** (even empty tag objects) will fail to publish in n8n 2.2.6. The `tags` field MUST be an empty array `[]`.
+
 **Workaround**:
-1. Import the workflow
-2. Open the workflow in the n8n editor
-3. Make a dummy edit (add/remove a tag, or drag any node slightly)
-4. Save the workflow
-5. Then publish - it should work
+1. Ensure `"tags": []` (empty array, no tag objects)
+2. Import the workflow
+3. Open the workflow in the n8n editor
+4. Make a dummy edit (drag any node slightly)
+5. Save the workflow
+6. Then publish - it should work
 
 **Reference**: [n8n Community #248302](https://community.n8n.io/t/cannot-publish-new-workflows-in-community-version/248302), [GitHub Issue #22393](https://github.com/n8n-io/n8n/issues/22393)
 
@@ -424,10 +428,18 @@ N8N_WEBHOOK_URL=https://n8n.b2ainvestments.com/webhook
 2. **Use unique webhook paths** to avoid conflicts
 3. **Set `active: false`** for imported workflows (activate manually after import)
 4. **Include error handling** with IF nodes and error response paths
-5. **Add descriptive tags** to workflows for organization
+5. **NEVER USE TAGS** - Always set `"tags": []` (empty array) to avoid publishing failures in n8n 2.2.6
 6. **Use proper positioning** for readable workflow diagrams
 7. **Test workflows** after import before activating
 8. **Keep credential references** consistent with UI setup
+
+### TAGS WARNING - READ BEFORE USING TAGS
+⚠️ **CRITICAL**: In n8n Community Edition 2.2.6, workflows with tags CANNOT be published. The tags array must remain empty `[]` at all times.
+
+**If user requests tags**:
+1. Warn them: "Tags will prevent the workflow from being published in n8n 2.2.6. This is a known bug. Are you sure you want to add tags? The workflow will need to be manually fixed to publish."
+2. Only proceed if user explicitly confirms
+3. Document that the workflow will require manual intervention to publish
 
 ---
 

@@ -2,6 +2,93 @@
 
 **codename** is a WaaS (Website as a Service) Factory - multi-tenant AI-powered website creation platform.
 
+---
+
+## 🤖 Automatic Skill Loading
+
+The following keywords automatically trigger specialized skills:
+
+### n8n Workflow Skills (Auto-Load)
+**Trigger phrases**:
+- "Build a new n8n workflow"
+- "Create n8n workflow"
+- "Add n8n workflow"
+- "Edit n8n workflow"
+- "Import workflow into n8n"
+- "Activate n8n workflow"
+- "List n8n workflows"
+- "Get webhook URL"
+- "n8n workflow"
+- "GLM Vision workflow"
+- "Theme apply workflow"
+
+**Skills loaded**: n8n-mcp-tools-expert, n8n-workflow-patterns, n8n-manager
+
+### Database Migration Skills (Auto-Load)
+**Trigger phrases**:
+- "Run migration"
+- "Apply migration"
+- "Database migration"
+- "Supabase migration"
+- "ALTER TABLE"
+- "Create migration"
+- "Migration 019/020/021/022/023/024/etc"
+- "RLS migration"
+- "Enable RLS"
+- "Add column to table"
+- "Create index"
+
+**Skills loaded**: supabase-migrations
+
+### Code & Expression Skills (Auto-Load)
+**Trigger phrases**:
+- "Write Code node"
+- "Add Code node"
+- "n8n Code node"
+- "n8n expression"
+- "Write n8n expression"
+- "Fix n8n expression"
+- "validate expression"
+- "JavaScript in n8n"
+
+**Skills loaded**: n8n-code-javascript, n8n-expression-syntax
+
+### Validation Skills (Auto-Load)
+**Trigger phrases**:
+- "Validate workflow"
+- "Check workflow"
+- "Validate n8n config"
+- "Fix validation error"
+- "Validation failed"
+- "Check node configuration"
+- "Validate node config"
+
+**Skills loaded**: n8n-validation-expert, n8n-node-configuration
+
+### Dev Story Skills (Auto-Load)
+**Trigger phrases**:
+- "DS" (dev-story)
+- "Dev story"
+- "Execute story"
+- "Run story"
+- "Create story"
+- "Sprint planning"
+
+**Skills loaded**: bmad-bmm:workflows:dev-story, bmad-bmm:workflows:sprint-planning
+
+### BMad Framework Skills (Auto-Load)
+**Trigger phrases**:
+- "Create epic"
+- "Create PRD"
+- "Create architecture"
+- "Create tech spec"
+- "Code review"
+- "Retrospective"
+
+**Skills loaded**: bmad-bmm:workflows:create-*, bmad-bmm:workflows:code-review
+
+---
+
 ## Core Architecture
 - **Multi-tenant**: PostgreSQL schema-based isolation (`tenant_*` schemas)
 - **Component hierarchy**: Site → Zone → Component (atom/molecule/organism)
@@ -149,3 +236,19 @@ Required (see `.env.example`):
 4. **Cost Monitoring** - Billing service tracks usage per tenant
 5. **Instagram Sync** - Background service mirrors content to components
 6. **Theme as CSS** - Design studio compiles to CSS variables for performance
+
+---
+
+## 📚 Critical Knowledge Base References
+
+**Database & Schema**:
+- Sites table uses `tenant_id` NOT `owner_id`
+- Connection pooler: `aws-1-us-east-2.pooler.supabase.com:6543`
+- See: `supabase-migrations` skill for credentials
+
+**n8n Workflow Warnings**:
+- Connection structure: 2D array `[[{...}]]` NOT 3D `[[[{...}]]]`
+- Project ID: `DoUXPTmX5jiPGzyG`
+- See: `n8n-manager` skill for complete issues list
+
+**For complete reference**: `/home/dev/.claude/skills/codename-database-knowledge-base.md`

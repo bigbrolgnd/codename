@@ -8,6 +8,7 @@ import { AddonsPage } from '../pages/AddonsPage';
 import { ComingSoon } from './ComingSoon';
 import { StaffList } from './StaffList';
 import { LightningBackground } from './LightningBackground';
+import { SystemActivityProvider, useSystemActivity } from './SystemActivityContext';
 import { useAdminRouter } from '../hooks/useAdminRouter';
 import { usePulseMetrics } from '../hooks/usePulseMetrics';
 import { ADMIN_ROUTES } from '../constants/routes';
@@ -22,10 +23,13 @@ import { AgentChat } from './AgentChat';
 import { SocialSharingWizard } from './SocialSharingWizard';
 import { useTenant } from '@/contexts/TenantContext';
 
-export const DashboardLayout: React.FC = () => {
-
+/**
+ * DashboardLayout inner component with access to SystemActivityContext
+ */
+const DashboardContent: React.FC = () => {
   const { currentRoute, navigate } = useAdminRouter();
   const { tenantId } = useTenant();
+  const { state: activityState } = useSystemActivity();
 
   const metrics = usePulseMetrics(tenantId ?? '');
   const [showWizard, setShowWizard] = React.useState(false);
@@ -111,7 +115,8 @@ export const DashboardLayout: React.FC = () => {
 
   return (
     <>
-      <LightningBackground />
+      {/* Pass activityLevel to LightningBackground */}
+      <LightningBackground activityLevel={activityState.level} />
       <div className="flex h-screen bg-transparent overflow-hidden text-zinc-50 selection:bg-violet-500/30">
 
       {/* Desktop Sidebar */}
@@ -128,7 +133,7 @@ export const DashboardLayout: React.FC = () => {
 
         <PulseHeader metrics={metrics} />
 
-        
+
 
         {/* Mobile Nav */}
 
@@ -148,13 +153,13 @@ export const DashboardLayout: React.FC = () => {
 
              <SheetContent side="left" className="p-0 w-64 glass-surface border-r-white/5">
 
-               <Sidebar 
+               <Sidebar
 
-                 currentRoute={currentRoute} 
+                 currentRoute={currentRoute}
 
-                 onNavigate={navigate} 
+                 onNavigate={navigate}
 
-                 isMobile 
+                 isMobile
 
                  tenantId={tenantId}
 
@@ -190,8 +195,21 @@ export const DashboardLayout: React.FC = () => {
       </div>
 
     </div>
+
     </>
 
   );
 
+};
+
+/**
+ * DashboardLayout component wrapped with SystemActivityProvider
+ * Provides system activity state context to all child components
+ */
+export const DashboardLayout: React.FC = () => {
+  return (
+    <SystemActivityProvider>
+      <DashboardContent />
+    </SystemActivityProvider>
+  );
 };

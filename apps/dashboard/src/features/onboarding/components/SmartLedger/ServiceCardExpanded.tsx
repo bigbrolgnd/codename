@@ -83,9 +83,6 @@ export const ServiceCardExpanded = ({
   return (
     <motion.div
       layoutId={`card-${service.id}`}
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
       className={cn("relative z-10 my-2", className)}
     >
       <Card className="border-primary/50 shadow-lg ring-1 ring-primary/20">

@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
 import { trpc } from '@/lib/trpc';
+import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
 import { Loader2, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SlotPickerProps {
-  tenantId: string;
+  tenantId?: string; // Optional prop for testing, defaults to context
   serviceId: string;
   onSelect: (slot: string) => void;
 }
 
-export const SlotPicker: React.FC<SlotPickerProps> = ({ tenantId, serviceId, onSelect }) => {
+export const SlotPicker: React.FC<SlotPickerProps> = ({ tenantId: propTenantId, serviceId, onSelect }) => {
+  const { tenantId: contextTenantId } = useTenant();
+  const tenantId = propTenantId ?? contextTenantId;
   const [selectedDate, setSelectedId] = useState<string>(new Date().toISOString().split('T')[0]);
 
-  const slotsQuery = trpc.booking.getAvailableSlots.useQuery({
-    tenantId,
-    serviceId,
-    date: selectedDate,
-  });
+  const slotsQuery = trpc.booking.getAvailableSlots.useQuery(
+    { tenantId, serviceId, date: selectedDate },
+    { enabled: !!tenantId } // Only query when tenantId is available
+  );
 
   // Generate next 7 days for the date picker
   const dates = Array.from({ length: 7 }, (_, i) => {

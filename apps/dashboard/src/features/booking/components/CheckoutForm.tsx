@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { trpc } from '@/lib/trpc';
+import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,20 +9,22 @@ import { Loader2, CreditCard, Lock, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface CheckoutFormProps {
-  tenantId: string;
+  tenantId?: string; // Optional prop for testing, defaults to context
   service: { id: string; name: string; price: number };
   slot: string;
   onSuccess: (bookingId: string) => void;
   simulateDelay?: number;
 }
 
-export const CheckoutForm: React.FC<CheckoutFormProps> = ({ 
-  tenantId, 
-  service, 
-  slot, 
+export const CheckoutForm: React.FC<CheckoutFormProps> = ({
+  tenantId: propTenantId,
+  service,
+  slot,
   onSuccess,
   simulateDelay = 2000
 }) => {
+  const { tenantId: contextTenantId } = useTenant();
+  const tenantId = propTenantId ?? contextTenantId;
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [isPaying, setIsPaying] = useState(false);

@@ -1,0 +1,135 @@
+{
+  "name": "Booking Confirmation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "booking-confirmation",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "booking-confirmation-webhook"
+    },
+    {
+      "parameters": {
+        "phoneNumber": "={{ $json.data.customer.phone }}",
+        "message": "=Booking Confirmed!\n\nHi {{ $json.data.customer.name }},\n\nYour appointment for {{ $json.data.booking.serviceName }} at {{ $json.data.business.name }} is confirmed for {{ new Date($json.data.booking.startTime).toLocaleString() }}.\n\nDeposit paid: ${{ ($json.data.booking.depositAmount / 100).toFixed(2) }}\n\nWe'll send you a calendar invite shortly.\n\nSee you soon!"
+      },
+      "id": "sms-customer",
+      "name": "Send SMS to Customer",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1.1,
+      "position": [460, 200],
+      "credentials": {
+        "twilioApi": {
+          "id": "1",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "phoneNumber": "={{ $json.business.whatsappPhone }}",
+        "message": "=🔔 NEW BOOKING ALERT!\n\nCustomer: {{ $json.data.customer.name }}\nService: {{ $json.data.booking.serviceName }}\nTime: {{ new Date($json.data.booking.startTime).toLocaleString() }}\nDeposit: ${{ ($json.data.booking.depositAmount / 100).toFixed(2) }}\nEmail: {{ $json.data.customer.email }}\n\nBooking ID: {{ $json.data.booking.bookingId }}"
+      },
+      "id": "whatsapp-owner",
+      "name": "Send WhatsApp to Owner",
+      "type": "n8n-nodes-base.whatsapp",
+      "typeVersion": 1,
+      "position": [460, 400],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1",
+          "name": "WhatsApp Business account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileName": "=calendar-invite-{{ $json.data.booking.bookingId }}.ics",
+        "fileContent": "=BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//codename//Booking Calendar//EN\nCALSCALE:GREGORIAN\nMETHOD:REQUEST\nBEGIN:VEVENT\nDTSTART:{{ new Date($json.data.booking.startTime).toISOString().replace(/[-:]/g, '').split('.')[0] }}Z\nDTEND:{{ new Date(new Date($json.data.booking.startTime).getTime() + 60*60*1000).toISOString().replace(/[-:]/g, '').split('.')[0] }}Z\nSUMMARY:{{ $json.data.booking.serviceName }} at {{ $json.data.business.name }}\nDESCRIPTION:Appointment for {{ $json.data.customer.name }}\nLOCATION:{{ $json.data.business.name }}\nORGANIZER;CN={{ $json.data.business.name }}:MAILTO:bookings@{{ $json.data.business.name.toLowerCase().replace(/\\s+/g, '') }}.com\nATTENDEE;CN={{ $json.data.customer.name }};RSVP=TRUE:MAILTO:{{ $json.data.customer.email }}\nEND:VEVENT\nEND:VCALENDAR"
+      },
+      "id": "calendar-invite",
+      "name": "Generate Calendar Invite",
+      "type": "n8n-nodes-base.writeFile",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"executionId\": \"{{ $execution.id }}\",\n  \"message\": \"Booking confirmation sent\",\n  \"channels\": [\"sms\", \"whatsapp\", \"calendar\"]\n}"
+      },
+      "id": "response-node",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send SMS to Customer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send WhatsApp to Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send SMS to Customer": {
+      "main": [
+        [
+          {
+            "node": "Generate Calendar Invite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp to Owner": {
+      "main": [
+        [
+          {
+            "node": "Generate Calendar Invite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Calendar Invite": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-15T00:00:00.000Z",
+  "versionId": "1"
+}

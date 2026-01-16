@@ -1,7 +1,5 @@
 import { DatabaseManager } from '@codename/database';
-import { NotificationService } from './notification.service';
-
-const notificationService = new NotificationService();
+import { notificationService } from './notification.service';
 
 export class PaymentService {
   constructor(private db: DatabaseManager) {}
@@ -36,15 +34,16 @@ export class PaymentService {
   async finalizeBooking(tenantId: string, data: {
     customerName: string;
     customerEmail: string;
+    customerPhone?: string;
     serviceId: string;
     startTime: string;
     paymentIntentId: string;
   }) {
     const startTime = new Date(data.startTime);
     
-    // 1. Fetch metadata for security and notifications
+    // 1. Fetch metadata for security and notifications (include price for deposit calculation)
     const metadataResult = await this.db.queryInSchema(tenantId,
-      `SELECT s.duration, s.name as service_name, t.business_name
+      `SELECT s.duration, s.name as service_name, s.price as price, t.business_name
        FROM services s
        CROSS JOIN public.tenants t
        WHERE s.id = $1 AND t.schema_name = $2`,
@@ -53,8 +52,9 @@ export class PaymentService {
 
     if (metadataResult.rows.length === 0) throw new Error('Service or Tenant not found');
 
-    const { duration, service_name, business_name } = metadataResult.rows[0];
+    const { duration, service_name, price, business_name } = metadataResult.rows[0];
     const endTime = new Date(startTime.getTime() + duration * 60000);
+    const depositAmount = Math.round(price * 0.2); // 20% deposit
 
     // 2. Create booking record
     const result = await this.db.queryInSchema(tenantId,
@@ -82,9 +82,12 @@ export class PaymentService {
     notificationService.sendBookingConfirmation({
       customerName: data.customerName,
       customerEmail: data.customerEmail,
+      customerPhone: data.customerPhone,
       businessName: business_name,
       serviceName: service_name,
       startTime: data.startTime,
+      depositAmount: depositAmount,
+      bookingId: result.rows[0].id,
     }).catch(err => console.error('[PaymentService] Notification failed:', err));
 
     return {
